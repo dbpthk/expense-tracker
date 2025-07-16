@@ -45,6 +45,7 @@ const SideNav = () => {
         {menuList.map((menu) => (
           <Link href={menu.path}>
             <h2
+              key={menu.id}
               className={cn(
                 "flex items-center gap-2 text-gray-700 font-medium p-5 cursor-pointer rounded-md hover:text-primary hover:bg-green-100",
                 path === menu.path && "text-primary bg-green-100"
