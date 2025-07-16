@@ -7,6 +7,7 @@ import Hero from "./_componets/Hero";
 import Dashboard from "./(routes)/dashboard/page";
 
 export default function Home() {
+  console.log(process.env.DATABASE_URL);
   return (
     <div>
       <Header />
