@@ -9,12 +9,12 @@ const Header = () => {
   const { user, isSignedIn } = useUser();
 
   return (
-    <div className="px-5 py-4 flex items-center justify-between shadow-md">
+    <div className="sticky top-0 z-50 w-full px-5 py-4 flex items-center justify-between shadow-md backdrop-blur-2xl bg-white/70">
       <Image src={"./logo.svg"} alt="logo" width={200} height={100} />
       {isSignedIn ? (
         <UserButton />
       ) : (
-        <Link href={"/sign-up"}>
+        <Link href={"/sign-in"}>
           <Button className="hover:bg-green-800 cursor-pointer">
             Get Started
           </Button>

@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Divide } from "lucide-react";
 import Header from "./_componets/Header";
 import Hero from "./_componets/Hero";
-import Dashboard from "./dashboard/page";
+import Dashboard from "./(routes)/dashboard/page";
 
 export default function Home() {
   return (
