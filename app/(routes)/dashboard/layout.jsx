@@ -7,6 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { Budgets } from "@/utils/schema";
 import { eq } from "drizzle-orm";
 import { useRouter } from "next/navigation";
+import { Toaster } from "@/components/ui/sonner";
 
 const DashboardLayout = ({ children }) => {
   const { user } = useUser();
@@ -21,7 +22,6 @@ const DashboardLayout = ({ children }) => {
       .select()
       .from(Budgets)
       .where(eq(Budgets.createdBy, user?.primaryEmailAddress.emailAddress));
-    console.log(result);
     if (result?.length === 0) {
       router.replace("/dashboard/budgets");
     }
@@ -35,6 +35,7 @@ const DashboardLayout = ({ children }) => {
 
       <div className="md:ml-64 ">
         <DashboardHeader />
+        <Toaster />
         {children}
       </div>
     </div>

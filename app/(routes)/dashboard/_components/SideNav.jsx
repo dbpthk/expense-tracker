@@ -43,9 +43,8 @@ const SideNav = () => {
 
       <div className="mt-5 flex flex-col gap-3">
         {menuList.map((menu) => (
-          <Link href={menu.path}>
+          <Link href={menu.path} key={menu.id}>
             <h2
-              key={menu.id}
               className={cn(
                 "flex items-center gap-2 text-gray-700 font-medium p-5 cursor-pointer rounded-md hover:text-primary hover:bg-green-100",
                 path === menu.path && "text-primary bg-green-100"
