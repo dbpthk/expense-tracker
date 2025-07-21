@@ -72,7 +72,7 @@ const CreateBudget = ({ refreshData }) => {
                   {emoji}
                 </Button>
 
-                <div className="absolute left-1/2 -translate-x-1/2 mt-2 ">
+                <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2 ">
                   {openEmojiPicker && (
                     <EmojiPicker
                       onEmojiClick={(emojiData) => {

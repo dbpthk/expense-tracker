@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import { LayoutGrid, PiggyBank, ReceiptText, ShieldCheck } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";

@@ -41,16 +41,25 @@ const BudgetList = () => {
     <div className="mt-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <CreateBudget refreshData={() => getBudgetList()} />
-        {budgetList.map((budget, index) => (
-          <BudgetItem
-            key={index}
-            icon={budget.icon}
-            name={budget.name}
-            totalItem={budget.totalItem}
-            amount={budget.amount}
-            totalSpend={budget.totalSpend}
-          />
-        ))}
+
+        {budgetList.length > 0
+          ? budgetList.map((budget, index) => (
+              <BudgetItem
+                key={index}
+                icon={budget.icon}
+                name={budget.name}
+                totalItem={budget.totalItem}
+                amount={budget.amount}
+                totalSpend={budget.totalSpend}
+              />
+            ))
+          : // skeleton effect for loading
+            [1, 2, 3, 4, 5, 6, 7, 8].map((item, index) => (
+              <div
+                key={index}
+                className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"
+              ></div>
+            ))}
       </div>
     </div>
   );
