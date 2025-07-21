@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,7 @@ const CreateBudget = () => {
         amount: Number(budgetAmount),
         createdBy: user.primaryEmailAddress.emailAddress, // now safe
         icon: emoji,
+        createdAt: new Date().toLocaleDateString("en-GB").split("/").join("-"),
       })
       .returning({ insertedId: Budgets.id });
 
@@ -51,7 +52,7 @@ const CreateBudget = () => {
     <div>
       <Dialog>
         <DialogTrigger asChild>
-          <div className="flex flex-col border-2 bg-[#9aecb729] p-10 rounded-md items-center cursor-pointer hover:shadow-md">
+          <div className="flex flex-col border-2 bg-[#9aecb729] p-12 rounded-md items-center cursor-pointer hover:shadow-md">
             <h2 className="text-3xl">+</h2>
             <h2>Create New Budget</h2>
           </div>
