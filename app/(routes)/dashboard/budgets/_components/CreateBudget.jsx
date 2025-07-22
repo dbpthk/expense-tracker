@@ -17,6 +17,7 @@ import { useUser } from "@clerk/nextjs";
 import { Budgets } from "@/utils/schema";
 import { toast } from "sonner";
 import db from "@/utils/dbConfig";
+import moment from "moment";
 
 const CreateBudget = ({ refreshData }) => {
   const [emoji, setEmoji] = useState("😀");
@@ -35,7 +36,7 @@ const CreateBudget = ({ refreshData }) => {
         amount: Number(budgetAmount),
         createdBy: user.primaryEmailAddress.emailAddress, // now safe
         icon: emoji,
-        createdAt: new Date().toLocaleDateString("en-GB").split("/").join("-"),
+        createdAt: moment().format("DD/MM/YYYY"),
       })
       .returning({ insertedId: Budgets.id });
 

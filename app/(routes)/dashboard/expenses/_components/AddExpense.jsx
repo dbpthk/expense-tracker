@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { Budgets } from "@/utils/schema";
 import { toast } from "sonner";
 import { toTitleCase } from "@/lib/utils";
+import moment from "moment";
 
 const AddExpense = ({ budgetId, refreshData, expType }) => {
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ const AddExpense = ({ budgetId, refreshData, expType }) => {
         name: name,
         amount: Number(amount),
         budgetId: budgetId,
-        createdAt: new Date().toLocaleDateString("en-GB").split("/").join("-"),
+        createdAt: moment().format("DD/MM/YYYY"),
       })
       .returning({ insertedId: Budgets.id });
     console.log(result);
@@ -36,7 +37,7 @@ const AddExpense = ({ budgetId, refreshData, expType }) => {
       <div>
         <h2 className="text-black font-medium my-1">Expense Name</h2>
         <Input
-          placeholder={`e.g. ${toTitleCase(expType)} Type`}
+          placeholder={`Enter ${toTitleCase(expType)} Expense`}
           onChange={(e) => setName(e.target.value)}
           value={name}
         />

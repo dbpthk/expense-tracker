@@ -2,14 +2,10 @@
 import Link from "next/link";
 import React from "react";
 import { toTitleCase } from "@/lib/utils";
+import Progressbar from "@/components/ui/Progressbar";
 
 const BudgetItem = ({ id, icon, name, totalItem, amount, totalSpend }) => {
   const remaining = Number(amount ?? 0) - Number(totalSpend ?? 0);
-
-  const progress =
-    amount && totalSpend
-      ? Math.min((Number(totalSpend) / Number(amount)) * 100, 100)
-      : 0;
 
   return (
     <Link
@@ -41,12 +37,7 @@ const BudgetItem = ({ id, icon, name, totalItem, amount, totalSpend }) => {
           </h2>
         </div>
 
-        <div className="w-full bg-green-100 h-2 rounded">
-          <div
-            className="bg-primary h-2 rounded"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
+        <Progressbar amount={amount} totalSpend={totalSpend} />
       </div>
     </Link>
   );

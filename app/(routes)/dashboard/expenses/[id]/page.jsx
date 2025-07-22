@@ -1,5 +1,5 @@
 "use client";
-import { sql, eq, and, getTableColumns } from "drizzle-orm";
+import { sql, eq, and, getTableColumns, desc } from "drizzle-orm";
 import db from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
 import { useEffect, useState } from "react";
@@ -7,17 +7,21 @@ import { useUser } from "@clerk/nextjs";
 import BudgetItem from "../../budgets/_components/BudgetItem";
 import AddExpense from "../_components/AddExpense";
 import { use } from "react";
+import ExpenseListTable from "../_components/ExpenseListTable";
 
 const ExpenseItem = ({ params }) => {
   const { id } = use(params);
   const { user, isLoaded } = useUser();
   const [budgetInfo, setBudgetInfo] = useState(null);
+  const [expensesList, setExpensesList] = useState();
 
   useEffect(() => {
     if (user && isLoaded) {
       getBudgetInfo();
     }
   }, [user, isLoaded]);
+
+  // Get Budget information
 
   const getBudgetInfo = async () => {
     try {
@@ -38,44 +42,58 @@ const ExpenseItem = ({ params }) => {
         .groupBy(Budgets.id);
 
       setBudgetInfo(result[0]);
+      getExpensesList();
     } catch (error) {
       console.error("Error fetching budget info:", error);
     }
   };
 
-  return (
-    <div className="p-10">
-      <h2 className="text-2xl font-bold">My Expenses</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 mt-6 gap-5">
-        {budgetInfo ? (
-          <BudgetItem
-            id={budgetInfo.id}
-            name={budgetInfo.name}
-            icon={budgetInfo.icon}
-            totalItem={budgetInfo.totalItem}
-            amount={budgetInfo.amount}
-            totalSpend={budgetInfo.totalSpend}
-          />
-        ) : (
-          <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>
-        )}
-        {/* <AddExpense
-          budgetId={id}
-          expType={budgetInfo.name}
-          user={user}
-          refreshData={() => getBudgetInfo()}
-        /> */}
+  // Get latest expenses
 
-        {budgetInfo ? (
-          <AddExpense
-            budgetId={id}
-            expType={budgetInfo.name}
-            user={user}
-            refreshData={() => getBudgetInfo()}
-          />
-        ) : (
-          <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>
-        )}
+  const getExpensesList = async () => {
+    const result = await db
+      .select()
+      .from(Expenses)
+      .where(eq(Expenses.budgetId, id))
+      .orderBy(desc(Expenses.id));
+    setExpensesList(result);
+  };
+
+  return (
+    <div className=" p-10 flex flex-col gap-8">
+      <div>
+        <h2 className="text-2xl font-bold">My Expenses</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 mt-6 gap-5">
+          {budgetInfo ? (
+            <BudgetItem
+              id={budgetInfo.id}
+              name={budgetInfo.name}
+              icon={budgetInfo.icon}
+              totalItem={budgetInfo.totalItem}
+              amount={budgetInfo.amount}
+              totalSpend={budgetInfo.totalSpend}
+            />
+          ) : (
+            <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>
+          )}
+          {budgetInfo ? (
+            <AddExpense
+              budgetId={id}
+              expType={budgetInfo.name}
+              user={user}
+              refreshData={() => getBudgetInfo()}
+            />
+          ) : (
+            <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>
+          )}
+        </div>
+      </div>
+      <div>
+        <h2 className="font-bold text-xl">Latest Expenses</h2>
+        <ExpenseListTable
+          expensesList={expensesList}
+          refereshData={() => getBudgetInfo()}
+        />
       </div>
     </div>
   );
