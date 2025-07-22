@@ -87,6 +87,7 @@ const CreateBudget = ({ refreshData }) => {
                   <Input
                     placeholder="e.g. Grocery"
                     onChange={(e) => setBudgetName(e.target.value)}
+                    value={budgetName}
                   />
                 </div>
 
@@ -96,6 +97,7 @@ const CreateBudget = ({ refreshData }) => {
                     type="number"
                     placeholder="e.g. 500"
                     onChange={(e) => setBudgetAmount(e.target.value)}
+                    value={budgetAmount}
                   />
                 </div>
               </div>

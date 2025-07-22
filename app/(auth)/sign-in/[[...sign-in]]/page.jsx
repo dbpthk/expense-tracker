@@ -1,3 +1,4 @@
+"use client";
 import { SignIn } from "@clerk/nextjs";
 
 export default function Page() {
@@ -5,6 +6,7 @@ export default function Page() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md">
         <SignIn
+          routing="path"
           appearance={{
             elements: {
               formButtonPrimary:

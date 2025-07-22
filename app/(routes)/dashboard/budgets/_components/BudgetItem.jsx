@@ -1,36 +1,9 @@
 "use client";
 import Link from "next/link";
 import React from "react";
+import { toTitleCase } from "@/lib/utils";
 
 const BudgetItem = ({ id, icon, name, totalItem, amount, totalSpend }) => {
-  const toTitleCase = (str) => {
-    const lowerWords = [
-      "and",
-      "or",
-      "the",
-      "of",
-      "in",
-      "on",
-      "a",
-      "an",
-      "for",
-      "to",
-      "with",
-      "at",
-      "by",
-      "from",
-    ];
-    return str
-      ?.toLowerCase()
-      .split(" ")
-      .map((word, i) =>
-        i === 0 || !lowerWords.includes(word)
-          ? word.charAt(0).toUpperCase() + word.slice(1)
-          : word
-      )
-      .join(" ");
-  };
-
   const remaining = Number(amount ?? 0) - Number(totalSpend ?? 0);
 
   const progress =
@@ -41,7 +14,7 @@ const BudgetItem = ({ id, icon, name, totalItem, amount, totalSpend }) => {
   return (
     <Link
       href={`/dashboard/expenses/${id}`}
-      className="p-5 border rounded-lg hover:shadow-md cursor-pointer"
+      className="p-5 border rounded-lg hover:shadow-md cursor-pointer h-[160px]"
     >
       <div className="flex items-center gap-3 justify-between">
         <div className="flex items-center gap-3">
