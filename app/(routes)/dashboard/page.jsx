@@ -8,6 +8,7 @@ import { sql } from "drizzle-orm";
 import { eq, desc, getTableColumns } from "drizzle-orm";
 import { Budgets, Expenses } from "@/utils/schema";
 import BarChartDashboard from "./_components/BarChartDashboard";
+import BudgetItem from "./budgets/_components/BudgetItem";
 
 const Dashboard = () => {
   const [budgetList, setBudgetList] = useState([]);
@@ -47,11 +48,27 @@ const Dashboard = () => {
         </p>
       </div>
       <CardInfo budgetList={budgetList} />
-      <div className="grid grid-cols-1 md:grid-cols-3">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <div className="md:col-span-2 ">
           <BarChartDashboard budgetList={budgetList} />
         </div>
-        <div>Other Content</div>
+        <div className="flex flex-col gap-5">
+          <h2 className="font-bold text-lg">Latest Budgets</h2>
+          {/* only showing recent 4 budget lists */}
+          {budgetList.slice(0, 4).map((budget, index) => (
+            <div>
+              <BudgetItem
+                id={budget.id}
+                icon={budget.icon}
+                name={budget.name}
+                totalItem={budget.totalItem}
+                amount={budget.amount}
+                totalSpend={budget.totalSpend}
+                key={index}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
