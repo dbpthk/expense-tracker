@@ -99,7 +99,13 @@ const ExpenseItem = ({ params }) => {
     <div className=" p-10 flex flex-col gap-8">
       <div>
         <div className="flex justify-between items-center">
-          <h2 className=" text-2xl font-bold">My Expenses</h2>
+          <div className="flex flex-row gap-2 items-center">
+            <ArrowLeft
+              className="cursor-pointer h-7 w-7"
+              onClick={() => route.replace("/dashboard/budgets")}
+            />
+            <h2 className=" text-2xl font-bold">My Expenses</h2>
+          </div>
           <div className="flex flex-row gap-5 justify-between items-center">
             <EditBudget
               budgetInfo={budgetInfo}
