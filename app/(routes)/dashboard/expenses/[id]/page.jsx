@@ -160,7 +160,6 @@ const ExpenseItem = ({ params }) => {
         </div>
       </div>
       <div>
-        <h2 className="font-bold text-xl">Latest Expenses</h2>
         <ExpenseListTable
           expensesList={expensesList}
           refereshData={() => getBudgetInfo()}

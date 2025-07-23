@@ -9,10 +9,12 @@ import { eq, desc, getTableColumns } from "drizzle-orm";
 import { Budgets, Expenses } from "@/utils/schema";
 import BarChartDashboard from "./_components/BarChartDashboard";
 import BudgetItem from "./budgets/_components/BudgetItem";
+import ExpenseListTable from "./expenses/_components/ExpenseListTable";
 
 const Dashboard = () => {
   const [budgetList, setBudgetList] = useState([]);
   const { user, isLoaded } = useUser();
+  const [expensesList, setExpensesList] = useState([]);
 
   useEffect(() => {
     if (user && isLoaded) {
@@ -34,10 +36,26 @@ const Dashboard = () => {
         .groupBy(Budgets.id)
         .orderBy(desc(Budgets.id));
       setBudgetList(result);
-      console.log(result);
+      getAllExpenses();
     } catch (error) {
       console.error("Error fetching budgets:", error);
     }
+  };
+
+  // get all expenses belong to users
+  const getAllExpenses = async () => {
+    const result = await db
+      .select({
+        id: Expenses.id,
+        name: Expenses.name,
+        amount: Expenses.amount,
+        createdAt: Expenses.createdAt,
+      })
+      .from(Budgets)
+      .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
+      .where(eq(Budgets.createdBy, user?.primaryEmailAddress.emailAddress))
+      .orderBy(desc(Expenses.id));
+    setExpensesList(result);
   };
   return (
     <div className="p-8 flex flex-col gap-7">
@@ -50,7 +68,15 @@ const Dashboard = () => {
       <CardInfo budgetList={budgetList} />
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         <div className="md:col-span-2 ">
-          <BarChartDashboard budgetList={budgetList} />
+          <div className="flex flex-col gap-5">
+            <BarChartDashboard budgetList={budgetList} />
+            <div>
+              <ExpenseListTable
+                expensesList={expensesList}
+                refereshData={() => getBudgetList()}
+              />
+            </div>
+          </div>
         </div>
         <div className="flex flex-col gap-5">
           <h2 className="font-bold text-lg">Latest Budgets</h2>

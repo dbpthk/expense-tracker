@@ -19,12 +19,13 @@ const ExpenseListTable = ({ expensesList, refereshData }) => {
     }
   };
   return (
-    <div className="mt-3">
+    <div>
+      <h2 className="font-bold text-xl mb-3">Latest Expenses</h2>
       <div className="grid grid-cols-4 bg-primary text-white font-bold text-sm md:text-lg p-2 pl-6">
         <h2>Name</h2>
         <h2>Amount</h2>
         <h2>Date</h2>
-        <h2>Action</h2>
+        <h2 className="text-center">Action</h2>
       </div>
       {Array.isArray(expensesList) && expensesList.length > 0
         ? expensesList.map((expense, index) => (
@@ -35,7 +36,7 @@ const ExpenseListTable = ({ expensesList, refereshData }) => {
               <h2>{toTitleCase(expense.name)}</h2>
               <h2>{expense.amount}</h2>
               <h2>{expense.createdAt}</h2>
-              <h2>
+              <h2 className="flex justify-center">
                 <Trash
                   className="text-red-600 h-[18px] md:h-[25px] cursor-pointer"
                   onClick={() => deleteExpense(expense)}

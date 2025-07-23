@@ -9,7 +9,6 @@ const CardInfo = ({ budgetList }) => {
     budgetList && CalculateCardInfo();
   }, [budgetList]);
   const CalculateCardInfo = () => {
-    console.log(budgetList);
     let totalBudget_ = 0;
     let totalSpend_ = 0;
 
@@ -17,7 +16,6 @@ const CardInfo = ({ budgetList }) => {
       totalBudget_ = totalBudget_ + Number(element.amount);
       totalSpend_ = totalSpend_ + Number(element.totalSpend);
     });
-    console.log(totalSpend_, "budget", totalBudget_);
     setTotalBudget(totalBudget_);
     setTotalSpend(totalSpend_);
   };
