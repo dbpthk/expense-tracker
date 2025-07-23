@@ -18,6 +18,7 @@ import { Budgets } from "@/utils/schema";
 import { toast } from "sonner";
 import db from "@/utils/dbConfig";
 import moment from "moment";
+import { toTitleCase } from "@/lib/utils";
 
 const CreateBudget = ({ refreshData }) => {
   const [emoji, setEmoji] = useState("😀");
@@ -87,7 +88,7 @@ const CreateBudget = ({ refreshData }) => {
                   <h2 className="text-black font-medium my-1">Budget Name</h2>
                   <Input
                     placeholder="e.g. Grocery"
-                    onChange={(e) => setBudgetName(e.target.value)}
+                    onChange={(e) => setBudgetName(toTitleCase(e.target.value))}
                     value={budgetName}
                   />
                 </div>

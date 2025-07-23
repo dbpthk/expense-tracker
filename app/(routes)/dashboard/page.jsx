@@ -7,6 +7,7 @@ import db from "@/utils/dbConfig";
 import { sql } from "drizzle-orm";
 import { eq, desc, getTableColumns } from "drizzle-orm";
 import { Budgets, Expenses } from "@/utils/schema";
+import BarChartDashboard from "./_components/BarChartDashboard";
 
 const Dashboard = () => {
   const [budgetList, setBudgetList] = useState([]);
@@ -38,12 +39,20 @@ const Dashboard = () => {
     }
   };
   return (
-    <div className="p-8">
-      <h2 className="font-bold text-3xl">Hi, {user?.fullName}</h2>
-      <p className="text-gray-500">
-        Here’s what’s happening with your money — let’s take control.
-      </p>
+    <div className="p-8 flex flex-col gap-7">
+      <div>
+        <h2 className="font-bold text-3xl">Hi, {user?.fullName}</h2>
+        <p className="text-gray-500">
+          Here’s what’s happening with your money — let’s take control.
+        </p>
+      </div>
       <CardInfo budgetList={budgetList} />
+      <div className="grid grid-cols-1 md:grid-cols-3">
+        <div className="md:col-span-2 ">
+          <BarChartDashboard budgetList={budgetList} />
+        </div>
+        <div>Other Content</div>
+      </div>
     </div>
   );
 };

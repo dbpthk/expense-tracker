@@ -24,7 +24,7 @@ const CardInfo = ({ budgetList }) => {
   return (
     <>
       {budgetList ? (
-        <div className="mt-8 grid grid-col-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className=" grid grid-col-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           <div className=" p-7 border rounded-lg flex items-center justify-between">
             <div>
               <h2 className="text-sm">Total Budget</h2>

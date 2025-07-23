@@ -18,6 +18,7 @@ import db from "@/utils/dbConfig";
 import { eq } from "drizzle-orm";
 import { Budgets } from "@/utils/schema";
 import { toast } from "sonner";
+import { toTitleCase } from "@/lib/utils";
 
 const EditBudget = ({ budgetInfo, refreshData }) => {
   const [emoji, setEmoji] = useState();
@@ -86,7 +87,7 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
                   <Input
                     placeholder="e.g. Grocery"
                     value={budgetName}
-                    onChange={(e) => setBudgetName(e.target.value)}
+                    onChange={(e) => setBudgetName(toTitleCase(e.target.value))}
                   />
                 </div>
 

@@ -38,7 +38,7 @@ const AddExpense = ({ budgetId, refreshData, expType }) => {
         <h2 className="text-black font-medium my-1">Expense Name</h2>
         <Input
           placeholder={`Enter ${toTitleCase(expType)} Expense`}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(toTitleCase(e.target.value))}
           value={name}
         />
       </div>
