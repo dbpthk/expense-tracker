@@ -9,7 +9,7 @@ import AddExpense from "../_components/AddExpense";
 import { use } from "react";
 import ExpenseListTable from "../_components/ExpenseListTable";
 import { Button } from "@/components/ui/button";
-import { Trash } from "lucide-react";
+import { ArrowLeft, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
