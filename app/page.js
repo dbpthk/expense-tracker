@@ -1,18 +1,18 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Divide } from "lucide-react";
+"use client";
 import Header from "./_componets/Header";
 import Hero from "./_componets/Hero";
 import Dashboard from "./(routes)/dashboard/page";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  console.log(process.env.DATABASE_URL);
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
   return (
     <div>
       <Header />
       <Hero />
-      <Dashboard />
+      {isSignedIn ? <Dashboard /> : null}
     </div>
   );
 }

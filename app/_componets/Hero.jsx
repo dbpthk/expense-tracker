@@ -48,8 +48,10 @@ const Hero = () => {
             className=" rounded-xl border-2"
             src={"/dashboard.png"}
             alt="dashboard"
-            width={1000}
-            height={700}
+            width={1200}
+            height={900}
+            quality={100}
+            priority
           />
         </div>
       </section>
