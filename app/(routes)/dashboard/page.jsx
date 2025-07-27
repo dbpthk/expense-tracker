@@ -10,6 +10,7 @@ import { Budgets, Expenses } from "@/utils/schema";
 import BarChartDashboard from "./_components/BarChartDashboard";
 import BudgetItem from "./budgets/_components/BudgetItem";
 import ExpenseListTable from "./expenses/_components/ExpenseListTable";
+import PieChartDashboard from "./_components/PieChartDashboard";
 
 const Dashboard = () => {
   const [budgetList, setBudgetList] = useState([]);
@@ -50,6 +51,7 @@ const Dashboard = () => {
         name: Expenses.name,
         amount: Expenses.amount,
         createdAt: Expenses.createdAt,
+        budgetId: Expenses.budgetId,
       })
       .from(Budgets)
       .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
@@ -66,10 +68,14 @@ const Dashboard = () => {
         </p>
       </div>
       <CardInfo budgetList={budgetList} />
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+      <div className="flex flex-col">
         <div className="md:col-span-2 ">
           <div className="flex flex-col gap-5">
             <BarChartDashboard budgetList={budgetList} />
+            <PieChartDashboard
+              budgetList={budgetList}
+              expensesList={expensesList}
+            />
             <div>
               <ExpenseListTable
                 expensesList={expensesList}
@@ -82,7 +88,7 @@ const Dashboard = () => {
           <h2 className="font-bold text-lg">Latest Budgets</h2>
           {/* only showing recent 4 budget lists */}
           {budgetList.slice(0, 4).map((budget, index) => (
-            <div>
+            <div key={index || budget.id}>
               <BudgetItem
                 id={budget.id}
                 icon={budget.icon}
@@ -90,7 +96,6 @@ const Dashboard = () => {
                 totalItem={budget.totalItem}
                 amount={budget.amount}
                 totalSpend={budget.totalSpend}
-                key={index}
               />
             </div>
           ))}
