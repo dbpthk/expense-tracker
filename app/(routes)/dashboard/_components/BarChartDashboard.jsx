@@ -24,7 +24,7 @@ const BarChartDashboard = ({ budgetList }) => {
   return (
     <div className="w-fit sm:w-full border rounded-lg py-5 pr-5 flex flex-col gap-5">
       <h2 className="font-bold pl-5 ">Activity</h2>
-      <div className="w-[350px] sm:w-[80%]">
+      <div className="min-w-[300px] sm:w-[80%] px-5">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
             data={budgetList}

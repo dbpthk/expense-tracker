@@ -43,7 +43,9 @@ function Button({ className, variant, size, asChild = false, ...props }) {
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {props.children}
+    </Comp>
   );
 }
 

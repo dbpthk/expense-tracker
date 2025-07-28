@@ -66,8 +66,8 @@ const renderExpenseLabel = ({
 
 // Separate memoized Pie components to avoid unnecessary re-renders
 const BudgetsPie = React.memo(({ data, colors, onClick }) => (
-  <div className="w-[450px] h-[300px]">
-    <h3 className="text-center font-semibold mb-2">Budgets</h3>
+  <div className="min-w-[400px] md:w-[600px]  h-[300px] flex flex-col justify-center items-center gap-5">
+    <h3 className="text-center font-semibold mb-2 border-b">Budgets</h3>
     <p className="text-center text-xs">Click each slice to see the spending</p>
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
@@ -75,12 +75,12 @@ const BudgetsPie = React.memo(({ data, colors, onClick }) => (
           data={data}
           cx="50%"
           cy="50%"
-          outerRadius={90}
+          outerRadius={70}
           dataKey="value"
           onClick={onClick}
           labelLine
           label={renderCustomizedLabel}
-          className="cursor-pointer text-xs md:text-sm"
+          className="cursor-pointer text-[9px] md:text-sm"
         >
           {data.map((_, index) => (
             <Cell key={index} fill={colors[index]} />
@@ -93,19 +93,19 @@ const BudgetsPie = React.memo(({ data, colors, onClick }) => (
 ));
 
 const SpendPie = React.memo(({ data, colors }) => (
-  <div className="w-[450px] h-[300px]">
-    <h3 className="text-center font-semibold mb-2">Total Spend So Far</h3>
+  <div className="min-w-[400px]  md:w-[600px] h-[300px] flex flex-col justify-center items-center gap-2">
+    <h3 className="text-center font-semibold border-b">Total Spend So Far</h3>
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
         <Pie
           data={data}
           cx="50%"
           cy="50%"
-          outerRadius={90}
+          outerRadius={70}
           dataKey="value"
           labelLine
           label={renderCustomizedLabel}
-          className="text-xs md:text-sm"
+          className="text-[9px] md:text-sm"
         >
           {data.map((_, index) => (
             <Cell key={index} fill={colors[index]} />
@@ -118,8 +118,8 @@ const SpendPie = React.memo(({ data, colors }) => (
 ));
 
 const ExpensePie = React.memo(({ data, colors, budgetName }) => (
-  <div className="w-[450px] h-[350px] mt-4 border-t pt-4">
-    <h3 className="text-center font-semibold mb-2">
+  <div className="min-w-[400px] md:w-[600px] h-[300px]  flex flex-col justify-center items-center">
+    <h3 className="text-center font-semibold border-b">
       Expenses under: {budgetName}
     </h3>
     <ResponsiveContainer width="100%" height="100%">
@@ -128,11 +128,11 @@ const ExpensePie = React.memo(({ data, colors, budgetName }) => (
           data={data}
           cx="50%"
           cy="50%"
-          outerRadius={100}
+          outerRadius={60}
           dataKey="value"
           labelLine
           label={renderExpenseLabel}
-          className="text-xs md:text-sm"
+          className="text-[9px] md:text-sm"
         >
           {data.map((_, index) => (
             <Cell key={index} fill={colors[index]} />
@@ -203,7 +203,7 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-15 items-center w-full p-4 border rounded-lg select-none">
+    <div className="flex flex-col items-center w-full p-4 border rounded-lg">
       <div className="flex flex-col xl:flex-row justify-center items-center gap-10">
         <BudgetsPie
           data={budgetData}
@@ -223,7 +223,7 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
               }
             />
           ) : (
-            <div className="w-full max-w-[400px] h-[350px] mt-4 border pt-4 text-center font-semibold">
+            <div className="w-full max-w-[450px] h-[350px] mt-4 border-t pt-4 text-center font-semibold text-destructive">
               No expense found under{" "}
               {budgetList.find((b) => b.id === selectedBudgetId)?.name ||
                 "Selected Budget"}
