@@ -52,7 +52,7 @@ const CreateBudget = ({ refreshData }) => {
   };
 
   return (
-    <div>
+    <div className="pt-10 md:pt-0">
       <Dialog>
         <DialogTrigger asChild>
           <div className="flex flex-col border-2 bg-[#9aecb729] p-12 rounded-md items-center cursor-pointer hover:shadow-md">

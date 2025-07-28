@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import SideNav from "./_components/SideNav";
+import NavBar from "./_components/NavBar.jsx";
 import DashboardHeader from "./_components/DashboardHeader.jsx";
 import db from "@/utils/dbConfig";
 import { useUser } from "@clerk/nextjs";
@@ -29,8 +29,8 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div>
-      <div className="fixed hidden md:block md:w-64 border shadow-sm">
-        <SideNav />
+      <div className="fixed block border shadow-sm">
+        <NavBar />
       </div>
 
       <div className="md:ml-64 ">

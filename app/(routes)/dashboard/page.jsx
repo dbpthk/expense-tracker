@@ -60,7 +60,7 @@ const Dashboard = () => {
     setExpensesList(result);
   };
   return (
-    <div className="p-8 flex flex-col gap-7">
+    <div className="pt-40 p-8 md:pt-15 flex flex-col gap-7">
       <div>
         <h2 className="font-bold text-3xl">Hi, {user?.fullName}</h2>
         <p className="text-gray-500">
