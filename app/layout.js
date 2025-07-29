@@ -1,9 +1,10 @@
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Outfit } from "next/font/google";
+import Provider from "./Provider";
 
 const outfit = Outfit({
   subsets: ["latin"],
+  variable: "--font-outfit",
   display: "swap",
 });
 
@@ -16,9 +17,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.className} antialiased`}>
-        <ClerkProvider>{children}</ClerkProvider>
+    <html lang="en" className={outfit.variable}>
+      <body suppressHydrationWarning>
+        <Provider>{children}</Provider>
       </body>
     </html>
   );
