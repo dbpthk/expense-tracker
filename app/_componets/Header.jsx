@@ -18,7 +18,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full px-6 py-3 flex items-center justify-between backdrop-blur-md bg-white/70 shadow-sm border-b">
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2">
+      <Link href="/dashboard" className="flex items-center gap-2">
         <Image
           src="/logo.svg"
           alt="logo"

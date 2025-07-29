@@ -2,21 +2,8 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 
 const Hero = () => {
-  const { isSignedIn } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isSignedIn) {
-      router.replace("/dashboard");
-    }
-  }, [isSignedIn, router]);
-
-  if (isSignedIn) return null;
   return (
     <div>
       <section className="bg-white lg:grid lg:h-screen lg:place-content-center">
