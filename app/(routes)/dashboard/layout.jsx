@@ -29,7 +29,7 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div>
-      <div className="block md:fixed">
+      <div className="block md:fixed top-0 left-0">
         <NavBar />
       </div>
 

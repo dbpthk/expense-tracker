@@ -74,13 +74,13 @@ const NavBar = () => {
       </aside>
 
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-5 shadow-md bg-white fixed w-full z-50 top-0 left-0">
+      <div className="md:hidden flex items-center justify-between px-5 py-2 shadow-md bg-white fixed w-full z-50 top-0 left-0">
         <Link href="/dashboard" className="flex items-center gap-2">
           <Image
             src="/logo.svg"
             alt="logo"
-            width={180}
-            height={80}
+            width={140}
+            height={60}
             className="object-contain"
           />
         </Link>

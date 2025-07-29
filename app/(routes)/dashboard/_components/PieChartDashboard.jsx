@@ -30,7 +30,7 @@ const renderCustomizedLabel = ({
       dominantBaseline="central"
       className="select-none"
     >
-      {`${name} (${(percent * 100).toFixed(0)}%)`}
+      {`${name}(${(percent * 100).toFixed(0)}%)`}
     </text>
   );
 };
@@ -57,9 +57,12 @@ const renderExpenseLabel = ({
       dominantBaseline="central"
       className="select-none"
     >
-      {`${payload.budgetName} (${payload.name}: ${(percent * 100).toFixed(
-        0
-      )}%)`}
+      <tspan x={x} dy="-0.6em">
+        {payload.budgetName}
+      </tspan>
+      <tspan x={x} dy="1.2em">
+        ({payload.name}: {(percent * 100).toFixed(0)}%)
+      </tspan>
     </text>
   );
 };
@@ -80,7 +83,7 @@ const BudgetsPie = React.memo(({ data, colors, onClick }) => (
           onClick={onClick}
           labelLine
           label={renderCustomizedLabel}
-          className="cursor-pointer text-[9px] md:text-sm"
+          className="cursor-pointer text-[8px] md:text-sm"
         >
           {data.map((_, index) => (
             <Cell key={index} fill={colors[index]} />
@@ -93,7 +96,7 @@ const BudgetsPie = React.memo(({ data, colors, onClick }) => (
 ));
 
 const SpendPie = React.memo(({ data, colors }) => (
-  <div className="min-w-[400px]  md:w-[600px] h-[300px] flex flex-col justify-center items-center gap-2">
+  <div className="min-w-[400px] md:w-[600px] h-[300px] flex flex-col justify-center items-center">
     <h3 className="text-center font-semibold border-b">Total Spend So Far</h3>
     <ResponsiveContainer width="100%" height="100%">
       <PieChart>
@@ -105,7 +108,7 @@ const SpendPie = React.memo(({ data, colors }) => (
           dataKey="value"
           labelLine
           label={renderCustomizedLabel}
-          className="text-[9px] md:text-sm"
+          className="text-[8px] md:text-sm"
         >
           {data.map((_, index) => (
             <Cell key={index} fill={colors[index]} />
@@ -203,8 +206,8 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full p-4 border rounded-lg">
-      <div className="flex flex-col xl:flex-row justify-center items-center gap-10">
+    <div className="flex flex-col items-center w-full p-4 border rounded-lg gap-15">
+      <div className="flex flex-col xl:flex-row justify-center items-center gap-15">
         <BudgetsPie
           data={budgetData}
           colors={budgetColors}

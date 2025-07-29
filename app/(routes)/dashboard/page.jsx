@@ -68,9 +68,9 @@ const Dashboard = () => {
         </p>
       </div>
       <CardInfo budgetList={budgetList} />
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-10">
         <div className="md:col-span-2">
-          <div className=" flex flex-col gap-5">
+          <div className=" flex flex-col gap-10">
             <BarChartDashboard budgetList={budgetList} />
             <PieChartDashboard
               budgetList={budgetList}
