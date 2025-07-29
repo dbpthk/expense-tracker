@@ -31,7 +31,7 @@ const ExpenseListTable = ({ expensesList, refereshData }) => {
         ? expensesList.map((expense, index) => (
             <div
               key={expense.id || index}
-              className="grid grid-cols-4 bg-neutral-background p-2 pl-6 text-sm md:text-medium"
+              className="grid grid-cols-4 gap-5 bg-neutral-background p-2 pl-6 text-sm md:text-medium border"
             >
               <h2>{toTitleCase(expense.name)}</h2>
               <h2>{expense.amount}</h2>
