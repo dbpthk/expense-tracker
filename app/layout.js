@@ -16,11 +16,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>
-        <ClerkProvider>
-          <div className={`${outfit.className} antialiased`}>{children}</div>
-        </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${outfit.className} antialiased`}>
+        <ClerkProvider>{children}</ClerkProvider>
       </body>
     </html>
   );

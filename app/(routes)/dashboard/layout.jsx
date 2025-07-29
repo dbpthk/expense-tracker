@@ -29,7 +29,7 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div>
-      <div className="fixed block border shadow-sm">
+      <div className="block md:fixed">
         <NavBar />
       </div>
 
