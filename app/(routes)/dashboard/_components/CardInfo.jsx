@@ -1,24 +1,10 @@
+import { useBudget } from "@/context/BugetContext";
 import { PiggyBank, ReceiptText, Wallet } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 const CardInfo = ({ budgetList }) => {
-  const [totalBudget, setTotalBudget] = useState(0);
-  const [totalSpend, setTotalSpend] = useState(0);
+  const { totalBudget, totalSpend } = useBudget();
 
-  useEffect(() => {
-    budgetList && CalculateCardInfo();
-  }, [budgetList]);
-  const CalculateCardInfo = () => {
-    let totalBudget_ = 0;
-    let totalSpend_ = 0;
-
-    budgetList.forEach((element) => {
-      totalBudget_ = totalBudget_ + Number(element.amount);
-      totalSpend_ = totalSpend_ + Number(element.totalSpend);
-    });
-    setTotalBudget(totalBudget_);
-    setTotalSpend(totalSpend_);
-  };
   return (
     <>
       {budgetList ? (

@@ -15,11 +15,12 @@ import {
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
+import { useBudget } from "@/context/BugetContext";
 
 const menuList = [
   { id: 1, name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
   { id: 2, name: "Budgets", icon: PiggyBank, path: "/dashboard/budgets" },
-  { id: 3, name: "Expenses", icon: ReceiptText, path: "/dashboard/expenses" },
+  { id: 3, name: "Expenses", icon: ReceiptText, path: "/dashboard/expense" },
   { id: 4, name: "Upgrade", icon: ShieldCheck, path: "/dashboard/upgrade" },
 ];
 
@@ -27,9 +28,10 @@ const NavBar = () => {
   const path = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "auto";
-  }, [isOpen]);
+  //to lock scrolling when mobile menu is open
+  // useEffect(() => {
+  //   document.body.style.overflow = isOpen ? "hidden" : "auto";
+  // }, [isOpen]);
 
   const renderMenu = () => (
     <nav className="flex flex-col gap-3 mt-5">
@@ -63,7 +65,7 @@ const NavBar = () => {
             alt="logo"
             width={180}
             height={80}
-            className="object-contain"
+            className="object-contain h-auto"
           />
         </Link>
         <div>{renderMenu()}</div>

@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Outfit } from "next/font/google";
 import Provider from "./Provider";
+import { BudgetProvider } from "@/context/BugetContext";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -19,7 +20,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={outfit.variable}>
       <body suppressHydrationWarning>
-        <Provider>{children}</Provider>
+        <Provider>
+          <BudgetProvider>{children}</BudgetProvider>
+        </Provider>
       </body>
     </html>
   );

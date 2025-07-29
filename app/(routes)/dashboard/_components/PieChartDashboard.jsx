@@ -207,32 +207,41 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
 
   return (
     <div className="flex flex-col items-center w-full p-4 border rounded-lg gap-15">
-      <div className="flex flex-col xl:flex-row justify-center items-center gap-15">
-        <BudgetsPie
-          data={budgetData}
-          colors={budgetColors}
-          onClick={handlePieClick}
-          className="border"
-        />
-        {/* Pie 3: Expenses under selected budget */}
-        {selectedBudgetId &&
-          (expenseData.length > 0 ? (
-            <ExpensePie
-              data={expenseData}
-              colors={expenseColors}
-              budgetName={
-                budgetList.find((b) => b.id === selectedBudgetId)?.name ||
-                "Selected Budget"
-              }
-            />
-          ) : (
-            <div className="w-full max-w-[450px] h-[350px] mt-4 border-t pt-4 text-center font-semibold text-destructive">
-              No expense found under{" "}
-              {budgetList.find((b) => b.id === selectedBudgetId)?.name ||
-                "Selected Budget"}
-            </div>
-          ))}
-      </div>
+      {budgetData && expenseData && expenseData.length > 0 && (
+        <div className="flex flex-col xl:flex-row justify-center items-center gap-15">
+          {/* Pie 1: Budgets */}
+          <BudgetsPie
+            data={budgetData}
+            colors={budgetColors}
+            onClick={handlePieClick}
+            className="border"
+          />
+
+          {/* Pie 2: Expenses under selected budget */}
+          {selectedBudgetId ? (
+            expenseData.some((e) => e.budgetId === selectedBudgetId) ? (
+              <ExpensePie
+                data={expenseData.filter(
+                  (e) => e.budgetId === selectedBudgetId
+                )}
+                colors={expenseColors}
+                budgetName={
+                  budgetList.find((b) => b.id === selectedBudgetId)?.name ||
+                  "Selected Budget"
+                }
+              />
+            ) : (
+              <div className="w-full max-w-[450px] h-[350px] mt-4 border-t pt-4 text-center font-semibold text-destructive">
+                No expense found under{" "}
+                {budgetList.find((b) => b.id === selectedBudgetId)?.name ||
+                  "Selected Budget"}
+              </div>
+            )
+          ) : null}
+        </div>
+      )}
+
+      {/* Pie 3: Overall Spend */}
 
       <SpendPie data={spendData} colors={spendColors} />
     </div>

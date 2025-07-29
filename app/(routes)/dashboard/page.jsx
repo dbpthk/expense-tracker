@@ -11,54 +11,11 @@ import BarChartDashboard from "./_components/BarChartDashboard";
 import BudgetItem from "./budgets/_components/BudgetItem";
 import ExpenseListTable from "./expenses/_components/ExpenseListTable";
 import PieChartDashboard from "./_components/PieChartDashboard";
+import { useBudget } from "@/context/BugetContext";
 
 const Dashboard = () => {
-  const [budgetList, setBudgetList] = useState([]);
-  const { user, isLoaded } = useUser();
-  const [expensesList, setExpensesList] = useState([]);
+  const { budgetList, expensesList, user, getBudgetList } = useBudget();
 
-  useEffect(() => {
-    if (user && isLoaded) {
-      getBudgetList();
-    }
-  }, [user, isLoaded]);
-
-  const getBudgetList = async () => {
-    try {
-      const result = await db
-        .select({
-          ...getTableColumns(Budgets),
-          totalSpend: sql`SUM(${Expenses.amount})`.mapWith(Number),
-          totalItem: sql`COUNT(${Expenses.id})`.mapWith(Number),
-        })
-        .from(Budgets)
-        .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-        .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-        .groupBy(Budgets.id)
-        .orderBy(desc(Budgets.id));
-      setBudgetList(result);
-      getAllExpenses();
-    } catch (error) {
-      console.error("Error fetching budgets:", error);
-    }
-  };
-
-  // get all expenses belong to users
-  const getAllExpenses = async () => {
-    const result = await db
-      .select({
-        id: Expenses.id,
-        name: Expenses.name,
-        amount: Expenses.amount,
-        createdAt: Expenses.createdAt,
-        budgetId: Expenses.budgetId,
-      })
-      .from(Budgets)
-      .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-      .where(eq(Budgets.createdBy, user?.primaryEmailAddress.emailAddress))
-      .orderBy(desc(Expenses.id));
-    setExpensesList(result);
-  };
   return (
     <div className="pt-15 p-8 flex flex-col gap-7">
       <div>
