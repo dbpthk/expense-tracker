@@ -14,6 +14,9 @@ const Expense = () => {
         expensesList={expensesList}
         refereshData={() => getBudgetList()}
       />
+      {expensesList.map((expense, index) => (
+        <div key={index}>{expense.category}</div>
+      ))}
       <CardInfo budgetList={budgetList} />
       <PieChartDashboard expensesList={expensesList} budgetList={[]} />
     </div>

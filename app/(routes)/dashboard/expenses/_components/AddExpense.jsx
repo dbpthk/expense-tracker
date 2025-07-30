@@ -25,9 +25,10 @@ const AddExpense = ({ budgetId, refreshData, expType }) => {
         amount: Number(amount),
         budgetId: budgetId,
         createdAt: moment().format("DD/MM/YYYY"),
+        category: expType,
       })
+
       .returning({ insertedId: Budgets.id });
-    console.log(result);
     if (result) {
       setLoading(false);
       refreshData();
