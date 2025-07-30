@@ -54,6 +54,7 @@ export const BudgetProvider = ({ children }) => {
         amount: Expenses.amount,
         createdAt: Expenses.createdAt,
         budgetId: Expenses.budgetId,
+        category: Budgets.name,
       })
       .from(Budgets)
       .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))

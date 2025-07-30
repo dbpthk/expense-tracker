@@ -4,11 +4,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 const RADIAN = Math.PI / 180;
 
-// Color generator
 const generateColors = (length) =>
   Array.from({ length }, (_, i) => `hsl(${(i * 137.5) % 360}, 70%, 60%)`);
 
-// Budget and Spend label
+// --- Label Renderers ---
 const renderCustomizedLabel = ({
   cx,
   cy,
@@ -17,10 +16,10 @@ const renderCustomizedLabel = ({
   percent,
   name,
 }) => {
+  if (percent < 0.02) return null;
   const radius = outerRadius + 20;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
   return (
     <text
       x={x}
@@ -30,12 +29,11 @@ const renderCustomizedLabel = ({
       dominantBaseline="central"
       className="select-none"
     >
-      {`${name}(${(percent * 100).toFixed(0)}%)`}
+      {`${name} (${(percent * 100).toFixed(0)}%)`}
     </text>
   );
 };
 
-// Expense under selected budget label
 const renderExpenseLabel = ({
   cx,
   cy,
@@ -44,10 +42,10 @@ const renderExpenseLabel = ({
   percent,
   payload,
 }) => {
+  if (percent < 0.02) return null;
   const radius = outerRadius + 20;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
   return (
     <text
       x={x}
@@ -67,9 +65,9 @@ const renderExpenseLabel = ({
   );
 };
 
-// Separate memoized Pie components to avoid unnecessary re-renders
+// --- Pie Components ---
 const BudgetsPie = React.memo(({ data, colors, onClick }) => (
-  <div className="min-w-[400px] md:w-[600px]  h-[300px] flex flex-col justify-center items-center gap-5">
+  <div className="min-w-[400px] md:w-[600px] h-[300px] flex flex-col justify-center items-center gap-5">
     <h3 className="text-center font-semibold mb-2 border-b">Budgets</h3>
     <p className="text-center text-xs">Click each slice to see the spending</p>
     <ResponsiveContainer width="100%" height="100%">
@@ -81,12 +79,12 @@ const BudgetsPie = React.memo(({ data, colors, onClick }) => (
           outerRadius={70}
           dataKey="value"
           onClick={onClick}
-          labelLine
+          labelLine={false}
           label={renderCustomizedLabel}
           className="cursor-pointer text-[8px] md:text-sm"
         >
           {data.map((_, index) => (
-            <Cell key={index} fill={colors[index]} />
+            <Cell key={index} fill={colors[index % colors.length]} />
           ))}
         </Pie>
         <Tooltip />
@@ -104,14 +102,13 @@ const SpendPie = React.memo(({ data, colors }) => (
           data={data}
           cx="50%"
           cy="50%"
-          outerRadius={70}
+          outerRadius={90}
           dataKey="value"
-          labelLine
+          labelLine={false}
           label={renderCustomizedLabel}
-          className="text-[8px] md:text-sm"
         >
           {data.map((_, index) => (
-            <Cell key={index} fill={colors[index]} />
+            <Cell key={index} fill={colors[index % colors.length]} />
           ))}
         </Pie>
         <Tooltip />
@@ -121,7 +118,7 @@ const SpendPie = React.memo(({ data, colors }) => (
 ));
 
 const ExpensePie = React.memo(({ data, colors, budgetName }) => (
-  <div className="min-w-[400px] md:w-[600px] h-[300px]  flex flex-col justify-center items-center">
+  <div className="min-w-[400px] md:w-[600px] h-[300px] flex flex-col justify-center items-center">
     <h3 className="text-center font-semibold border-b">
       Expenses under: {budgetName}
     </h3>
@@ -131,14 +128,14 @@ const ExpensePie = React.memo(({ data, colors, budgetName }) => (
           data={data}
           cx="50%"
           cy="50%"
-          outerRadius={60}
+          outerRadius={70}
           dataKey="value"
-          labelLine
+          labelLine={false}
           label={renderExpenseLabel}
           className="text-[9px] md:text-sm"
         >
           {data.map((_, index) => (
-            <Cell key={index} fill={colors[index]} />
+            <Cell key={index} fill={colors[index % colors.length]} />
           ))}
         </Pie>
         <Tooltip />
@@ -147,10 +144,10 @@ const ExpensePie = React.memo(({ data, colors, budgetName }) => (
   </div>
 ));
 
-const PieChartDashboard = ({ budgetList, expensesList }) => {
+// --- Main Dashboard ---
+const PieChartDashboard = ({ budgetList = [], expensesList = [] }) => {
   const [selectedBudgetId, setSelectedBudgetId] = useState(null);
 
-  // Memoize budgetData to keep reference stable
   const budgetData = useMemo(() => {
     return budgetList.map((b) => ({
       id: b.id,
@@ -159,33 +156,66 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
     }));
   }, [budgetList]);
 
-  // Memoize spendData to keep reference stable
   const spendData = useMemo(() => {
-    return budgetList.map((b) => {
-      const totalSpent = expensesList
-        .filter((e) => e.budgetId === b.id)
-        .reduce((sum, e) => sum + Number(e.amount), 0);
-      return { name: b.name, value: totalSpent };
-    });
+    if (budgetList.length > 0) {
+      return budgetList.map((b) => {
+        const totalSpent = expensesList
+          .filter((e) => e.budgetId === b.id)
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+        return { name: b.name, value: totalSpent };
+      });
+    }
+
+    // If no budgets, group expenses by category instead
+    const categoryMap = new Map();
+    for (const e of expensesList) {
+      const cat = e.category || "Uncategorized";
+      const amount = Number(e.amount);
+      categoryMap.set(cat, (categoryMap.get(cat) || 0) + amount);
+    }
+
+    return Array.from(categoryMap.entries()).map(([name, value]) => ({
+      name,
+      value,
+    }));
   }, [budgetList, expensesList]);
 
-  // Memoize expenseData for selected budget
   const expenseData = useMemo(() => {
     if (!selectedBudgetId) return [];
-    return expensesList
-      .filter((e) => e.budgetId === selectedBudgetId)
-      .map((e) => {
-        const budgetName =
-          budgetList.find((b) => b.id === e.budgetId)?.name || "Unknown";
-        return {
-          name: e.name,
-          value: Number(e.amount),
-          budgetName,
-        };
+
+    const budget = budgetList.find((b) => b.id === selectedBudgetId);
+    if (!budget) return [];
+
+    // Expenses under this budget
+    const expenses = expensesList.filter(
+      (e) => e.budgetId === selectedBudgetId
+    );
+
+    const totalExpenses = expenses.reduce(
+      (sum, e) => sum + Number(e.amount),
+      0
+    );
+
+    // Prepare expense slices
+    const expenseSlices = expenses.map((e) => ({
+      name: e.name,
+      value: Number(e.amount),
+      budgetName: budget.name,
+    }));
+
+    // Add remaining budget slice if any
+    const remaining = Number(budget.amount) - totalExpenses;
+    if (remaining > 0) {
+      expenseSlices.push({
+        name: "Remaining Budget",
+        value: remaining,
+        budgetName: budget.name,
       });
+    }
+
+    return expenseSlices;
   }, [selectedBudgetId, expensesList, budgetList]);
 
-  // Memoize color arrays
   const budgetColors = useMemo(
     () => generateColors(budgetData.length),
     [budgetData]
@@ -199,7 +229,6 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
     [expenseData]
   );
 
-  // Memoized click handler, toggles selection
   const handlePieClick = useCallback((data) => {
     const clickedId = data.payload.id;
     setSelectedBudgetId((prevId) => (prevId === clickedId ? null : clickedId));
@@ -207,23 +236,17 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
 
   return (
     <div className="flex flex-col items-center w-full p-4 border rounded-lg gap-15">
-      {budgetData && expenseData && expenseData.length > 0 && (
+      {budgetData.length > 0 && expensesList.length > 0 && (
         <div className="flex flex-col xl:flex-row justify-center items-center gap-15">
-          {/* Pie 1: Budgets */}
           <BudgetsPie
             data={budgetData}
             colors={budgetColors}
             onClick={handlePieClick}
-            className="border"
           />
-
-          {/* Pie 2: Expenses under selected budget */}
           {selectedBudgetId ? (
-            expenseData.some((e) => e.budgetId === selectedBudgetId) ? (
+            expenseData.length > 0 ? (
               <ExpensePie
-                data={expenseData.filter(
-                  (e) => e.budgetId === selectedBudgetId
-                )}
+                data={expenseData}
                 colors={expenseColors}
                 budgetName={
                   budgetList.find((b) => b.id === selectedBudgetId)?.name ||
@@ -241,9 +264,17 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
         </div>
       )}
 
-      {/* Pie 3: Overall Spend */}
+      {/* Show SpendPie only if there are expenses but no budget data */}
+      {budgetList.length === 0 && expensesList.length > 0 && (
+        <SpendPie data={spendData} colors={spendColors} />
+      )}
 
-      <SpendPie data={spendData} colors={spendColors} />
+      {/* Optional: fallback for no data at all */}
+      {expensesList.length === 0 && (
+        <div className="text-center text-muted-foreground py-10">
+          No expense data available to display charts.
+        </div>
+      )}
     </div>
   );
 };

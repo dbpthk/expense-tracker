@@ -15,7 +15,7 @@ const Expense = () => {
         refereshData={() => getBudgetList()}
       />
       <CardInfo budgetList={budgetList} />
-      <PieChartDashboard expensesList={expensesList} />
+      <PieChartDashboard expensesList={expensesList} budgetList={[]} />
     </div>
   );
 };
