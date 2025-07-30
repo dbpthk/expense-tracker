@@ -1,12 +1,12 @@
 "use client";
-import { UserButton, useUser } from "@clerk/nextjs";
+// import { UserButton, useUser } from "@clerk/nextjs";
 
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
 import CardInfo from "./_components/CardInfo";
-import db from "@/utils/dbConfig";
-import { sql } from "drizzle-orm";
-import { eq, desc, getTableColumns } from "drizzle-orm";
-import { Budgets, Expenses } from "@/utils/schema";
+// import db from "@/utils/dbConfig";
+// import { sql } from "drizzle-orm";
+// import { eq, desc, getTableColumns } from "drizzle-orm";
+// import { Budgets, Expenses } from "@/utils/schema";
 import BarChartDashboard from "./_components/BarChartDashboard";
 import BudgetItem from "./budgets/_components/BudgetItem";
 import ExpenseListTable from "./expenses/_components/ExpenseListTable";

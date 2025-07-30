@@ -44,6 +44,7 @@ const BarChartDashboard = ({ budgetList }) => {
               stackId="a"
               fill="#009857"
               barSize={isSmallScreen ? 20 : 40}
+              barSize={10}
             />
             <Bar
               dataKey="amount"

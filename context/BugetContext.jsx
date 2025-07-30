@@ -77,7 +77,6 @@ export const BudgetProvider = ({ children }) => {
     setTotalBudget(totalBudget_);
     setTotalSpend(totalSpend_);
   };
-
   return (
     <BudgetContext.Provider
       value={{
