@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -7,15 +8,14 @@ import {
   XAxis,
   YAxis,
   ResponsiveContainer,
+  Cell,
 } from "recharts";
-import { useEffect, useState } from "react";
 
 const BarChartDashboard = ({ budgetList }) => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
-    const checkScreenSize = () => setIsSmallScreen(window.innerWidth < 640); // Tailwind 'sm' breakpoint
-
+    const checkScreenSize = () => setIsSmallScreen(window.innerWidth < 640);
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
@@ -23,37 +23,59 @@ const BarChartDashboard = ({ budgetList }) => {
 
   return (
     <div className="w-fit sm:w-full border rounded-lg py-5 pr-5 flex flex-col gap-5">
-      <h2 className="font-bold pl-5 ">Activity</h2>
+      <h2 className="font-bold pl-5">Activity</h2>
       <div className="min-w-[300px] sm:w-[80%] px-5">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
-            className="outline-none"
+            className="outline-none "
             data={budgetList}
             margin={{ top: 5, right: 5, bottom: 5 }}
             barCategoryGap={isSmallScreen ? 20 : 10}
           >
             <XAxis
               dataKey="name"
-              tick={{ fontSize: isSmallScreen ? 10 : 14 }}
+              angle={-45}
+              tick={{ fontSize: isSmallScreen ? 8 : 12 }}
+              height={90}
+              textAnchor="end"
             />
-            <YAxis tick={{ fontSize: isSmallScreen ? 10 : 14 }} />
-            <Tooltip />
-            <Legend wrapperStyle={{ fontSize: isSmallScreen ? 10 : 14 }} />
+            <YAxis tick={{ fontSize: isSmallScreen ? 8 : 12 }} />
+            <Tooltip height={20} />
+            <Legend wrapperStyle={{ fontSize: isSmallScreen ? 8 : 12 }} />
+
+            {/* Bar for "Spent So Far" with color shades */}
             <Bar
               dataKey="totalSpend"
               name="Spent So Far"
               stackId="a"
-              fill="#009857"
-              barSize={isSmallScreen ? 20 : 40}
-              barSize={10}
-            />
+              barSize={isSmallScreen ? 10 : 20}
+            >
+              {budgetList.map((entry, index) => (
+                <Cell
+                  key={`cell-spend-${index}`}
+                  fill={entry.color || "#009857"}
+                />
+              ))}
+            </Bar>
+
+            {/* Bar for "Your Budget" with lighter color shades */}
             <Bar
               dataKey="amount"
               name="Your Budget"
               stackId="a"
-              fill="#89d6a4"
-              barSize={isSmallScreen ? 20 : 40}
-            />
+              barSize={isSmallScreen ? 10 : 20}
+            >
+              {budgetList.map((entry, index) => (
+                <Cell
+                  key={`cell-budget-${index}`}
+                  fill={
+                    entry.color
+                      ? `${entry.color}99` // apply ~60% opacity as a shade
+                      : "#89d6a4"
+                  }
+                />
+              ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

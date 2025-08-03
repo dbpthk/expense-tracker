@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -20,14 +21,29 @@ import db from "@/utils/dbConfig";
 import moment from "moment";
 import { toTitleCase } from "@/lib/utils";
 
+// 🎨 12 Color Options
+const COLOR_OPTIONS = [
+  { name: "blue", hex: "#3B82F6" },
+  { name: "red", hex: "#EF4444" },
+  { name: "green", hex: "#10B981" },
+  { name: "yellow", hex: "#FACC15" },
+  { name: "purple", hex: "#8B5CF6" },
+  { name: "orange", hex: "#F97316" },
+  { name: "teal", hex: "#14B8A6" },
+  { name: "pink", hex: "#EC4899" },
+  { name: "indigo", hex: "#6366F1" },
+  { name: "gray", hex: "#6B7280" },
+  { name: "lime", hex: "#84CC16" },
+  { name: "cyan", hex: "#06B6D4" },
+];
+
 const CreateBudget = ({ refreshData }) => {
   const [emoji, setEmoji] = useState("😀");
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [budgetName, setBudgetName] = useState("");
   const [budgetAmount, setBudgetAmount] = useState("");
+  const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[0].hex);
   const { user } = useUser();
-
-  // New Budget
 
   const onCreateBudget = async () => {
     const result = await db
@@ -35,8 +51,9 @@ const CreateBudget = ({ refreshData }) => {
       .values({
         name: budgetName,
         amount: Number(budgetAmount),
-        createdBy: user.primaryEmailAddress.emailAddress, // now safe
+        createdBy: user.primaryEmailAddress.emailAddress,
         icon: emoji,
+        color: selectedColor,
         createdAt: moment().format("DD/MM/YYYY"),
       })
       .returning({ insertedId: Budgets.id });
@@ -47,6 +64,7 @@ const CreateBudget = ({ refreshData }) => {
       setBudgetName("");
       setBudgetAmount("");
       setEmoji("😀");
+      setSelectedColor(COLOR_OPTIONS[0].hex);
       setOpenEmojiPicker(false);
     }
   };
@@ -55,7 +73,7 @@ const CreateBudget = ({ refreshData }) => {
     <div className="pt-0">
       <Dialog>
         <DialogTrigger asChild>
-          <div className=" flex flex-col border-2 bg-[#9aecb729] p-12 rounded-md items-center cursor-pointer hover:shadow-md">
+          <div className="flex flex-col border-2 bg-[#9aecb729] p-12 rounded-md items-center cursor-pointer hover:shadow-md">
             <h2 className="text-3xl">+</h2>
             <h2>Create New Budget</h2>
           </div>
@@ -65,6 +83,7 @@ const CreateBudget = ({ refreshData }) => {
             <DialogTitle>Create New Budget</DialogTitle>
             <DialogDescription>
               <div className="mt-5">
+                {/* Emoji Picker */}
                 <Button
                   variant="outline"
                   size="lg"
@@ -74,17 +93,19 @@ const CreateBudget = ({ refreshData }) => {
                   {emoji}
                 </Button>
 
-                <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2 ">
-                  {openEmojiPicker && (
+                {openEmojiPicker && (
+                  <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2">
                     <EmojiPicker
                       onEmojiClick={(emojiData) => {
                         setEmoji(emojiData.emoji);
                         setOpenEmojiPicker(false);
                       }}
                     />
-                  )}
-                </div>
-                <div className="mt-2">
+                  </div>
+                )}
+
+                {/* Budget Name */}
+                <div className="mt-4">
                   <h2 className="text-black font-medium my-1">Budget Name</h2>
                   <Input
                     placeholder="e.g. Grocery"
@@ -95,7 +116,8 @@ const CreateBudget = ({ refreshData }) => {
                   />
                 </div>
 
-                <div className="mt-2">
+                {/* Budget Amount */}
+                <div className="mt-4">
                   <h2 className="text-black font-medium my-1">Budget Amount</h2>
                   <Input
                     type="number"
@@ -103,6 +125,29 @@ const CreateBudget = ({ refreshData }) => {
                     onChange={(e) => setBudgetAmount(e.target.value)}
                     value={budgetAmount}
                   />
+                </div>
+
+                {/* Color Picker */}
+                <div className="mt-4">
+                  <h2 className="text-black font-medium my-1">
+                    Select a Color
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {COLOR_OPTIONS.map((color) => (
+                      <button
+                        key={color.hex}
+                        type="button"
+                        onClick={() => setSelectedColor(color.hex)}
+                        className={`w-8 h-8 rounded-full border-2 transition ${
+                          selectedColor === color.hex
+                            ? "ring-2 ring-offset-2 ring-gray-600"
+                            : "border-transparent"
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                        aria-label={color.name}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </DialogDescription>
@@ -112,7 +157,7 @@ const CreateBudget = ({ refreshData }) => {
               <Button
                 disabled={!(budgetName && budgetAmount)}
                 className="mt-2 w-full cursor-pointer"
-                onClick={() => onCreateBudget()}
+                onClick={onCreateBudget}
               >
                 Create Budget
               </Button>

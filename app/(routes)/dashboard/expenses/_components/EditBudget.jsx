@@ -20,17 +20,31 @@ import { Budgets } from "@/utils/schema";
 import { toast } from "sonner";
 import { toTitleCase } from "@/lib/utils";
 
+// Use the same color options as CreateBudget
+const colorOptions = [
+  "#8884d8",
+  "#82ca9d",
+  "#ffc658",
+  "#ff8042",
+  "#00C49F",
+  "#FFBB28",
+  "#3b82f6",
+  "#ef4444",
+];
+
 const EditBudget = ({ budgetInfo, refreshData }) => {
   const [emoji, setEmoji] = useState();
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [budgetName, setBudgetName] = useState();
   const [budgetAmount, setBudgetAmount] = useState();
+  const [color, setColor] = useState("");
 
   useEffect(() => {
     if (budgetInfo) {
       setEmoji(budgetInfo?.icon);
       setBudgetName(budgetInfo?.name);
       setBudgetAmount(budgetInfo?.amount);
+      setColor(budgetInfo?.color || colorOptions[0]);
     }
   }, [budgetInfo]);
 
@@ -41,9 +55,11 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
         name: budgetName,
         amount: budgetAmount,
         icon: emoji,
+        color: color,
       })
       .where(eq(Budgets.id, budgetInfo.id))
       .returning();
+
     if (result) {
       toast("Budget Updated");
       refreshData();
@@ -63,16 +79,25 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
             <DialogTitle>Update Budget</DialogTitle>
             <DialogDescription>
               <div className="mt-5">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="cursor-pointer text-2xl"
-                  onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
-                >
-                  {emoji}
-                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="cursor-pointer text-2xl flex items-center justify-center"
+                    onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
+                  >
+                    {emoji}
+                  </Button>
+                  {color && (
+                    <div
+                      className="w-8 h-8 rounded-full border"
+                      style={{ backgroundColor: color }}
+                      aria-label="Selected budget color"
+                    />
+                  )}
+                </div>
 
-                <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2 ">
+                <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2">
                   {openEmojiPicker && (
                     <EmojiPicker
                       onEmojiClick={(emojiData) => {
@@ -82,7 +107,26 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
                     />
                   )}
                 </div>
-                <div className="mt-2">
+
+                <div className="mt-4">
+                  <h2 className="text-black font-medium my-1">Choose Color</h2>
+                  <div className="flex gap-3 flex-wrap">
+                    {colorOptions.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setColor(c)}
+                        className={`w-8 h-8 rounded-full border-2 ${
+                          color === c ? "border-black" : "border-transparent"
+                        }`}
+                        style={{ backgroundColor: c }}
+                        aria-label={`Select color ${c}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-5">
                   <h2 className="text-black font-medium my-1">Budget Name</h2>
                   <Input
                     placeholder="e.g. Grocery"
@@ -108,7 +152,7 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
               <Button
                 disabled={!(budgetName && budgetAmount)}
                 className="mt-2 w-full cursor-pointer"
-                onClick={() => onUpdateBudget()}
+                onClick={onUpdateBudget}
               >
                 Update Budget
               </Button>

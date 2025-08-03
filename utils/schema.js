@@ -1,4 +1,3 @@
-// utils/schema.js
 import { integer } from "drizzle-orm/gel-core";
 import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
@@ -7,9 +6,11 @@ export const Budgets = pgTable("budgets", {
   name: varchar("name").notNull(),
   amount: integer("amount").notNull(),
   icon: varchar("icon"),
+  color: varchar("color").notNull(), // 🎨 new column for selected color
   createdBy: varchar("createdBy").notNull(),
   createdAt: varchar("createdAt").notNull(),
 });
+
 export const Expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
   name: varchar("name").notNull(),
@@ -17,4 +18,5 @@ export const Expenses = pgTable("expenses", {
   budgetId: integer("budgetId").references(() => Budgets.id),
   createdAt: varchar("createdAt").notNull(),
   category: varchar("category").notNull(),
+  color: varchar("color").notNull(),
 });

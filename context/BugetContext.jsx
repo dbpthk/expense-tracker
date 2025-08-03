@@ -1,4 +1,3 @@
-// context/BudgetContext.jsx
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
@@ -29,8 +28,8 @@ export const BudgetProvider = ({ children }) => {
     try {
       const result = await db
         .select({
-          ...getTableColumns(Budgets),
-          totalSpend: sql`SUM(${Expenses.amount})`.mapWith(Number),
+          ...getTableColumns(Budgets), // includes color if in schema
+          totalSpend: sql`COALESCE(SUM(${Expenses.amount}), 0)`.mapWith(Number),
           totalItem: sql`COUNT(${Expenses.id})`.mapWith(Number),
         })
         .from(Budgets)
@@ -38,8 +37,10 @@ export const BudgetProvider = ({ children }) => {
         .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
         .groupBy(Budgets.id)
         .orderBy(desc(Budgets.id));
+
       setBudgetList(result);
-      setTotalSpend(totalSpend);
+      // Calculate totals based on fetched budgets
+      calculateCardInfo(result);
       getAllExpenses();
     } catch (error) {
       console.error("Error fetching budgets:", error);
@@ -47,36 +48,39 @@ export const BudgetProvider = ({ children }) => {
   };
 
   const getAllExpenses = async () => {
-    const result = await db
-      .select({
-        id: Expenses.id,
-        name: Expenses.name,
-        amount: Expenses.amount,
-        createdAt: Expenses.createdAt,
-        budgetId: Expenses.budgetId,
-        category: Budgets.name,
-      })
-      .from(Budgets)
-      .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-      .where(eq(Budgets.createdBy, user?.primaryEmailAddress.emailAddress))
-      .orderBy(desc(Expenses.id));
-    setExpensesList(result);
+    try {
+      const result = await db
+        .select({
+          id: Expenses.id,
+          name: Expenses.name,
+          amount: Expenses.amount,
+          createdAt: Expenses.createdAt,
+          budgetId: Expenses.budgetId,
+          category: Budgets.name,
+        })
+        .from(Budgets)
+        .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
+        .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
+        .orderBy(desc(Expenses.id));
+      setExpensesList(result);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+    }
   };
 
-  useEffect(() => {
-    budgetList && CalculateCardInfo();
-  }, [budgetList]);
-  const CalculateCardInfo = () => {
+  const calculateCardInfo = (budgets) => {
     let totalBudget_ = 0;
     let totalSpend_ = 0;
 
-    budgetList.forEach((element) => {
-      totalBudget_ = totalBudget_ + Number(element.amount);
-      totalSpend_ = totalSpend_ + Number(element.totalSpend);
+    budgets.forEach((element) => {
+      totalBudget_ += Number(element.amount);
+      totalSpend_ += Number(element.totalSpend);
     });
+
     setTotalBudget(totalBudget_);
     setTotalSpend(totalSpend_);
   };
+
   return (
     <BudgetContext.Provider
       value={{

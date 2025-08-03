@@ -12,16 +12,18 @@ const CardInfo = ({ budgetList }) => {
           <div className=" p-7 border rounded-lg flex items-center justify-between">
             <div>
               <h2 className="text-sm">Total Budget</h2>
-              <h2 className="text-2xl font-bold">${totalBudget}</h2>
+              <h2 className="text-2xl font-bold text-primary">
+                ${totalBudget}
+              </h2>
             </div>
             <PiggyBank className="bg-primary text-white h-12 w-13 p-2 rounded-full" />
           </div>
           <div className=" p-7 border rounded-lg flex items-center justify-between">
             <div>
               <h2 className="text-sm">Total Spent</h2>
-              <h2 className="text-2xl font-bold">${totalSpend}</h2>
+              <h2 className="text-2xl font-bold text-chart-1">${totalSpend}</h2>
             </div>
-            <ReceiptText className="bg-primary text-white h-12 w-13 p-2 rounded-full" />
+            <ReceiptText className="bg-chart-1 text-white h-12 w-13 p-2 rounded-full" />
           </div>
           <div className=" p-7 border rounded-lg flex items-center justify-between">
             <div>

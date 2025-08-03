@@ -24,13 +24,13 @@ const Expense = () => {
   const [monthOffset, setMonthOffset] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const currentMonth = moment().add(monthOffset, "months").format("MM/YYYY");
+  const currentMonth = moment().add(monthOffset, "months").format("MMMM YYYY");
 
   // Filter expenses by selected month
   const filteredExpenses = useMemo(() => {
     return expensesList.filter((expense) => {
       return (
-        moment(expense.createdAt, "DD/MM/YYYY").format("MM/YYYY") ===
+        moment(expense.createdAt, "DD/MM/YYYY").format("MMMM YYYY") ===
           currentMonth &&
         expense.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -194,8 +194,13 @@ const Expense = () => {
                 <h3 className="text-primary font-semibold text-base border-b pb-1 flex items-center gap-3 text-gray-800">
                   <span className="text-xl">{getCategoryIcon(category)}</span>
                   <span>
-                    {category} – $
-                    {expenses.reduce((sum, e) => sum + e.amount, 0).toFixed(2)}
+                    {category} –{" "}
+                    <span className="text-red-700 font-semibold">
+                      $
+                      {expenses
+                        .reduce((sum, e) => sum + e.amount, 0)
+                        .toFixed(2)}
+                    </span>
                   </span>
                 </h3>
 
@@ -206,7 +211,7 @@ const Expense = () => {
                       className="flex justify-between border-b border-gray-100 py-1"
                     >
                       <span>{expense.name}</span>
-                      <span className="font-medium">
+                      <span className="font-medium text-red-700">
                         ${expense.amount.toFixed(2)}
                       </span>
                     </li>

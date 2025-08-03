@@ -2,11 +2,10 @@
 import { sql, eq, and, getTableColumns, desc } from "drizzle-orm";
 import db from "@/utils/dbConfig";
 import { Budgets, Expenses } from "@/utils/schema";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useUser } from "@clerk/nextjs";
 import BudgetItem from "../../budgets/_components/BudgetItem";
 import AddExpense from "../_components/AddExpense";
-import { use } from "react";
 import ExpenseListTable from "../_components/ExpenseListTable";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Trash } from "lucide-react";
@@ -38,8 +37,6 @@ const ExpenseItem = ({ params }) => {
     }
   }, [user, isLoaded]);
 
-  // Get Budget information
-
   const getBudgetInfo = async () => {
     try {
       const result = await db
@@ -47,6 +44,7 @@ const ExpenseItem = ({ params }) => {
           ...getTableColumns(Budgets),
           totalSpend: sql`SUM(${Expenses.amount})`.mapWith(Number),
           totalItem: sql`COUNT(${Expenses.id})`.mapWith(Number),
+          color: Budgets.color, // added color fetch
         })
         .from(Budgets)
         .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
@@ -65,8 +63,6 @@ const ExpenseItem = ({ params }) => {
     }
   };
 
-  // Get latest expenses
-
   const getExpensesList = async () => {
     const result = await db
       .select()
@@ -76,27 +72,20 @@ const ExpenseItem = ({ params }) => {
     setExpensesList(result);
   };
 
-  //delete budget
-
   const deleteBudget = async () => {
-    //delete expense before deleting budget
     const deleteExpenseResult = await db
       .delete(Expenses)
       .where(eq(Expenses.budgetId, id))
       .returning();
     if (deleteExpenseResult) {
-      //deleting budget
-      const result = await db
-        .delete(Budgets)
-        .where(eq(Budgets.id, id))
-        .returning();
+      await db.delete(Budgets).where(eq(Budgets.id, id)).returning();
     }
     toast("Budget Deleted");
     route.replace("/dashboard/budgets");
   };
 
   return (
-    <div className=" p-10 flex flex-col gap-8">
+    <div className="p-10 flex flex-col gap-8">
       <div>
         <div className="flex justify-between items-center">
           <div className="flex flex-row gap-2 items-center">
@@ -104,13 +93,10 @@ const ExpenseItem = ({ params }) => {
               className="cursor-pointer h-7 w-7"
               onClick={() => route.replace("/dashboard")}
             />
-            <h2 className=" text-2xl font-bold">My Expenses</h2>
+            <h2 className="text-2xl font-bold">My Expenses</h2>
           </div>
           <div className="flex flex-row gap-5 justify-between items-center">
-            <EditBudget
-              budgetInfo={budgetInfo}
-              refreshData={() => getBudgetInfo()}
-            />
+            <EditBudget budgetInfo={budgetInfo} refreshData={getBudgetInfo} />
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
@@ -131,7 +117,7 @@ const ExpenseItem = ({ params }) => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => deleteBudget()}>
+                  <AlertDialogAction onClick={deleteBudget}>
                     Continue
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -149,27 +135,31 @@ const ExpenseItem = ({ params }) => {
               totalItem={budgetInfo.totalItem}
               amount={budgetInfo.amount}
               totalSpend={budgetInfo.totalSpend}
+              color={budgetInfo.color} // pass color here
             />
           ) : (
             <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>
           )}
+
           {budgetInfo ? (
             <AddExpense
               budgetId={id}
               expType={budgetInfo.name}
               user={user}
-              refreshData={() => getBudgetInfo()}
-              refereshExpenses={() => getExpensesList()}
+              refreshData={getBudgetInfo}
+              refereshExpenses={getExpensesList}
+              color={budgetInfo.color} // pass color here too
             />
           ) : (
             <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>
           )}
         </div>
       </div>
+
       <div>
         <ExpenseListTable
           expensesList={expensesList}
-          refereshData={() => getBudgetInfo()}
+          refreshData={getBudgetInfo}
         />
       </div>
     </div>

@@ -51,6 +51,7 @@ const BudgetList = () => {
                 totalItem={budget.totalItem}
                 amount={budget.amount}
                 totalSpend={budget.totalSpend}
+                color={budget.color} // 🎨 Pass selected color
               />
             ))
           : Array.from({ length: 8 }).map((_, index) => (
