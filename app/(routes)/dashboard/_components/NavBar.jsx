@@ -122,7 +122,7 @@ const NavBar = () => {
                 exit={{ opacity: 0, rotate: -90 }}
                 transition={{ duration: 0.2 }}
               >
-                <Menu className="w-8 h-8 text-gray-800 cursor-pointer" />
+                <Menu className="w-10 h-10 text-gray-800 cursor-pointer" />
               </motion.div>
             )}
           </AnimatePresence>
