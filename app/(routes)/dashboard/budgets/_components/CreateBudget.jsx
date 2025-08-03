@@ -55,12 +55,12 @@ const CreateBudget = ({ refreshData }) => {
     <div className="pt-0">
       <Dialog>
         <DialogTrigger asChild>
-          <div className="flex flex-col border-2 bg-[#9aecb729] p-12 rounded-md items-center cursor-pointer hover:shadow-md">
+          <div className=" flex flex-col border-2 bg-[#9aecb729] p-12 rounded-md items-center cursor-pointer hover:shadow-md">
             <h2 className="text-3xl">+</h2>
             <h2>Create New Budget</h2>
           </div>
         </DialogTrigger>
-        <DialogContent className="absolute top-1/2">
+        <DialogContent className="fixed top-1/2">
           <DialogHeader>
             <DialogTitle>Create New Budget</DialogTitle>
             <DialogDescription>
@@ -88,7 +88,9 @@ const CreateBudget = ({ refreshData }) => {
                   <h2 className="text-black font-medium my-1">Budget Name</h2>
                   <Input
                     placeholder="e.g. Grocery"
-                    onChange={(e) => setBudgetName(toTitleCase(e.target.value))}
+                    onChange={(e) =>
+                      setBudgetName(toTitleCase(e.target.value || ""))
+                    }
                     value={budgetName}
                   />
                 </div>

@@ -16,6 +16,7 @@ import {
 import { UserButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { useBudget } from "@/context/BugetContext";
+import { useUser } from "@clerk/nextjs";
 
 const menuList = [
   { id: 1, name: "Dashboard", icon: LayoutGrid, path: "/dashboard" },
@@ -23,6 +24,8 @@ const menuList = [
   { id: 3, name: "Expenses", icon: ReceiptText, path: "/dashboard/expense" },
   { id: 4, name: "Upgrade", icon: ShieldCheck, path: "/dashboard/upgrade" },
 ];
+
+const { user } = useUser;
 
 const NavBar = () => {
   const path = usePathname();
@@ -69,8 +72,17 @@ const NavBar = () => {
           />
         </Link>
         <div>{renderMenu()}</div>
-        <div className="mt-auto p-4 flex items-center gap-3 text-gray-700">
-          <UserButton />
+        <div className="mt-auto p-4 h-16 w-16 flex items-center gap-3 text-gray-700">
+          <UserButton
+            appearance={{
+              elements: {
+                rootBox: "w-full h-full", // Applies size to the root
+                userButtonAvatarBox: "w-full h-full", // Avatar box fills root
+                avatarBox: "w-full h-full", // Optional fallback
+              },
+            }}
+            tabIndex={0}
+          />
           <span>Profile</span>
         </div>
       </aside>
@@ -129,9 +141,8 @@ const NavBar = () => {
             className="md:hidden fixed inset-0 bg-white z-40 p-6 pt-20 mt-15 overflow-y-auto"
           >
             {renderMenu()}
-            <div className="mt-8 border-t pt-4 flex items-center gap-3 text-gray-700">
+            <div className="mt-8 border-t pt-4 w-full cursor-pointer flex items-center gap-3 text-gray-700">
               <UserButton />
-              <span>Profile</span>
             </div>
           </motion.div>
         )}

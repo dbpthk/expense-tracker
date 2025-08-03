@@ -10,7 +10,7 @@ import { toTitleCase } from "@/lib/utils";
 import moment from "moment";
 import { Loader } from "lucide-react";
 
-const AddExpense = ({ budgetId, refreshData, expType }) => {
+const AddExpense = ({ budgetId, refreshData, refereshExpenses, expType }) => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +32,7 @@ const AddExpense = ({ budgetId, refreshData, expType }) => {
     if (result) {
       setLoading(false);
       refreshData();
+      refereshExpenses();
       toast("New Expense Added!");
       setName("");
       setAmount("");

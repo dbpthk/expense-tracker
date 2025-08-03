@@ -27,6 +27,7 @@ const BarChartDashboard = ({ budgetList }) => {
       <div className="min-w-[300px] sm:w-[80%] px-5">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
+            className="outline-none"
             data={budgetList}
             margin={{ top: 5, right: 5, bottom: 5 }}
             barCategoryGap={isSmallScreen ? 20 : 10}
