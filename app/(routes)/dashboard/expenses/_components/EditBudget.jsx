@@ -19,6 +19,7 @@ import { eq } from "drizzle-orm";
 import { Budgets } from "@/utils/schema";
 import { toast } from "sonner";
 import { toTitleCase } from "@/lib/utils";
+import moment from "moment";
 
 // Use the same color options as CreateBudget
 const colorOptions = [
@@ -40,11 +41,20 @@ const colorOptions = [
 ];
 
 const EditBudget = ({ budgetInfo, refreshData }) => {
-  const [emoji, setEmoji] = useState();
+  const [emoji, setEmoji] = useState("");
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [budgetName, setBudgetName] = useState("");
   const [budgetAmount, setBudgetAmount] = useState(0);
   const [color, setColor] = useState("");
+  const [customDate, setCustomDate] = useState("");
+
+  console.log({
+    budgetInfo,
+    emoji,
+    budgetName,
+    budgetAmount,
+    color,
+  });
 
   useEffect(() => {
     if (budgetInfo) {
@@ -52,10 +62,22 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
       setBudgetName(budgetInfo?.name);
       setBudgetAmount(budgetInfo?.amount);
       setColor(budgetInfo?.color || colorOptions[0]);
+
+      // If budget has a created date, parse it to YYYY-MM-DD for <input type="date" />
+      if (budgetInfo?.createdAt) {
+        const parsed = moment(budgetInfo.createdAt, "DD/MM/YYYY").format(
+          "YYYY-MM-DD"
+        );
+        setCustomDate(parsed);
+      }
     }
   }, [budgetInfo]);
 
   const onUpdateBudget = async () => {
+    const dateToSave = customDate
+      ? moment(customDate).format("DD/MM/YYYY")
+      : moment().format("DD/MM/YYYY");
+
     const result = await db
       .update(Budgets)
       .set({
@@ -63,6 +85,7 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
         amount: budgetAmount,
         icon: emoji,
         color: color,
+        createdAt: dateToSave,
       })
       .where(eq(Budgets.id, budgetInfo.id))
       .returning();
@@ -149,6 +172,15 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
                     placeholder="e.g. 500"
                     value={budgetAmount}
                     onChange={(e) => setBudgetAmount(e.target.value)}
+                  />
+                </div>
+                {/* Custom Date */}
+                <div className="mt-2">
+                  <h2 className="font-medium">Custom Date</h2>
+                  <Input
+                    type="date"
+                    value={customDate}
+                    onChange={(e) => setCustomDate(e.target.value)}
                   />
                 </div>
               </div>
