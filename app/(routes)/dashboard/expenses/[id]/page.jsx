@@ -91,7 +91,7 @@ const ExpenseItem = ({ params }) => {
           <div className="flex flex-row gap-2 items-center">
             <ArrowLeft
               className="cursor-pointer h-7 w-7"
-              onClick={() => route.replace("/dashboard")}
+              onClick={() => route.replace("/dashboard/expense")}
             />
             <h2 className="text-2xl font-bold">My Expenses</h2>
           </div>

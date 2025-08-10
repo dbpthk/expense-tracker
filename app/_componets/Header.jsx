@@ -32,9 +32,7 @@ const Header = () => {
         <UserButton className="hidden md:block" />
       ) : (
         <Link href={"/sign-in"}>
-          <Button className="hover:bg-green-800 cursor-pointer">
-            Get Started
-          </Button>
+          <Button className="hover:bg-green-800 cursor-pointer">Sign In</Button>
         </Link>
       )}
     </header>

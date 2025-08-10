@@ -18,15 +18,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 const Expense = () => {
   const { expensesList, budgetList } = useBudget();
   const [monthOffset, setMonthOffset] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
+
+  const handleCategoryClick = (category) => {
+    // Find budget by category name to get budget id
+    const budget = budgetList.find((b) => b.name === category);
+    if (budget) {
+      router.push(`/dashboard/budgets/${budget.id}`);
+    } else {
+      // Optional: handle case if budget not found
+      console.warn("Budget not found for category:", category);
+    }
+  };
 
   const currentMonth = moment().add(monthOffset, "months").format("MMMM YYYY");
 
-  // Filter expenses by selected month
   const filteredExpenses = useMemo(() => {
     return expensesList.filter((expense) => {
       return (
@@ -37,7 +50,6 @@ const Expense = () => {
     });
   }, [expensesList, currentMonth, searchTerm]);
 
-  // Group expenses by date and category
   const groupedByDate = useMemo(() => {
     const grouped = {};
     filteredExpenses.forEach((expense) => {
@@ -75,14 +87,10 @@ const Expense = () => {
     }));
   }, [filteredExpenses]);
 
-  const COLORS = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff8042",
-    "#00C49F",
-    "#FFBB28",
-  ];
+  const getCategoryColor = (category) => {
+    const match = budgetList.find((b) => b.name === category);
+    return match?.color || "#8884d8";
+  };
 
   const getCategoryIcon = (category) => {
     const match = budgetList.find((b) => b.name === category);
@@ -121,107 +129,151 @@ const Expense = () => {
         />
       </div>
 
-      {/* Bar chart */}
-      <div className="w-full h-64 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 20, right: 20, left: 0, bottom: 60 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="date"
-              tick={{ fontSize: 11, fill: "#4b5563" }}
-              angle={-45}
-              textAnchor="end"
-              height={60}
-            />
-            <YAxis
-              tick={{ fontSize: 12, fill: "#4b5563" }}
-              tickFormatter={(value) => `$${value}`}
-            />
-            <Tooltip formatter={(value) => [`$${value}`, "Total"]} />
-            <Bar
-              dataKey="amount"
-              fill="#3b82f6"
-              radius={[6, 6, 0, 0]}
-              barSize={18}
-              activeBar={{ fill: "#2563eb", barSize: 22, radius: [8, 8, 0, 0] }}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Pie chart */}
-      <div className="w-full h-64 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={pieData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              fill="#8884d8"
-              label={({ name, percent }) =>
-                `${name}: ${(percent * 100).toFixed(0)}%`
-              }
-              labelLine={false}
-            >
-              {pieData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
+      {filteredExpenses.length === 0 ? (
+        <div className="text-center py-20 text-muted-foreground border rounded-lg shadow-sm bg-white">
+          <p className="text-lg">
+            No expenses found for the selected month or search term.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="w-full h-64 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 20, left: 0, bottom: 60 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11, fill: "#4b5563" }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                 />
-              ))}
-            </Pie>
-            <Tooltip formatter={(value) => [`$${value}`, "Category"]} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Breakdown by date and category - no toggling, always visible */}
-      <div className="flex flex-col gap-5">
-        {Object.entries(groupedByDate).map(([date, categories]) => (
-          <div
-            key={date}
-            className="border border-gray-200 rounded-lg shadow-sm bg-white p-4"
-          >
-            <h2 className="font-semibold text-lg mb-4 text-gray-800">{date}</h2>
-            {Object.entries(categories).map(([category, expenses]) => (
-              <div key={category} className="mb-6">
-                <h3 className="text-primary font-semibold text-base border-b pb-1 flex items-center gap-3 text-gray-800">
-                  <span className="text-xl">{getCategoryIcon(category)}</span>
-                  <span>
-                    {category} –{" "}
-                    <span className="text-red-700 font-semibold">
-                      $
-                      {expenses
-                        .reduce((sum, e) => sum + e.amount, 0)
-                        .toFixed(2)}
-                    </span>
-                  </span>
-                </h3>
-
-                <ul className="pl-4 text-sm text-gray-700 space-y-1 mt-2">
-                  {expenses.map((expense) => (
-                    <li
-                      key={expense.id}
-                      className="flex justify-between border-b border-gray-100 py-1"
-                    >
-                      <span>{expense.name}</span>
-                      <span className="font-medium text-red-700">
-                        ${expense.amount.toFixed(2)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+                <YAxis
+                  tick={{ fontSize: 12, fill: "#4b5563" }}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip
+                  formatter={(value) => [`$${value}`, "Total"]}
+                  contentStyle={{ fontSize: "0.875rem" }}
+                />
+                <Bar
+                  dataKey="amount"
+                  fill="#60a5fa"
+                  radius={[6, 6, 0, 0]}
+                  barSize={22}
+                  activeBar={{
+                    fill: "#3b82f6",
+                    barSize: 26,
+                    radius: [8, 8, 0, 0],
+                  }}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        ))}
-      </div>
+
+          <div className="w-full h-64 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
+                  labelLine={false}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={getCategoryColor(entry.name)}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => [`$${value}`, "Category"]} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="flex flex-col gap-5">
+            {Object.entries(groupedByDate).map(([date, categories]) => {
+              const totalForDay = Object.values(categories)
+                .flat()
+                .reduce((sum, e) => sum + e.amount, 0);
+              return (
+                <div
+                  key={date}
+                  className="border border-gray-200 rounded-lg shadow-sm bg-white"
+                >
+                  <div className="bg-gray-100 w-full px-4 py-2 flex justify-between items-center">
+                    <h2 className="font-semibold text-lg text-gray-800">
+                      {date}
+                    </h2>
+                    <span className="text-sm font-medium text-gray-600">
+                      Total: ${totalForDay.toFixed(2)}
+                    </span>
+                  </div>
+
+                  {Object.entries(categories).map(([category, expenses]) => {
+                    const totalForCategory = expenses.reduce(
+                      (sum, e) => sum + e.amount,
+                      0
+                    );
+                    const categoryColor = getCategoryColor(category);
+
+                    return (
+                      <div
+                        key={category}
+                        onClick={() => handleCategoryClick(category)}
+                        className="cursor-pointer hover:bg-gray-50 border-b border-gray-200 last:border-none px-6 py-3"
+                        style={{ color: categoryColor }}
+                      >
+                        <h3
+                          className="flex items-center gap-3 font-semibold text-base mb-1"
+                          style={{ color: categoryColor }}
+                        >
+                          <span className="text-xl">
+                            {getCategoryIcon(category)}
+                          </span>
+                          <span>
+                            {category} –{" "}
+                            <span className="font-semibold">
+                              ${totalForCategory.toFixed(2)}
+                            </span>
+                          </span>
+                        </h3>
+                        <ul className="pl-6 text-sm text-gray-700 space-y-1">
+                          {expenses.map((expense) => (
+                            <li
+                              key={expense.id}
+                              className="flex justify-between border-b border-gray-100 py-1 last:border-none"
+                            >
+                              {expense.name}
+                              <span
+                                className="font-medium"
+                                style={{ color: categoryColor }}
+                              >
+                                ${expense.amount.toFixed(2)}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      // </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 };
