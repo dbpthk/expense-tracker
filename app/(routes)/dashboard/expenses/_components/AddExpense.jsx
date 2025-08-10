@@ -17,6 +17,7 @@ const AddExpense = ({ budgetId, refreshData, refereshExpenses, expType }) => {
   const [loading, setLoading] = useState(false);
   const [color, setColor] = useState("");
   const { setReferesh } = useBudget();
+  const [expenseDate, setExpenseDate] = useState(moment().format("YYYY-MM-DD")); // default to today
 
   // Fetch budget color by budgetId
   useEffect(() => {
@@ -47,13 +48,14 @@ const AddExpense = ({ budgetId, refreshData, refereshExpenses, expType }) => {
   const AddNewExpense = async () => {
     setLoading(true);
     try {
+      const formattedDate = moment(expenseDate).format("DD/MM/YYYY");
       const result = await db
         .insert(Expenses)
         .values({
           name,
           amount: Number(amount),
           budgetId,
-          createdAt: moment().format("DD/MM/YYYY"),
+          createdAt: formattedDate,
           category: expType,
           // If you want to save color per expense, uncomment this line and add `color` column in schema:
           color,
@@ -67,6 +69,7 @@ const AddExpense = ({ budgetId, refreshData, refereshExpenses, expType }) => {
         setReferesh((prev) => prev + 1);
         setName("");
         setAmount("");
+        setExpenseDate(moment().format("YYYY-MM-DD"));
       }
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -93,6 +96,16 @@ const AddExpense = ({ budgetId, refreshData, refereshExpenses, expType }) => {
           placeholder="e.g. $ 80"
           onChange={(e) => setAmount(e.target.value)}
           value={amount}
+        />
+      </div>
+
+      {/* Expense Date */}
+      <div>
+        <h2 className="text-black font-medium my-1">Expense Date</h2>
+        <Input
+          type="date"
+          value={expenseDate}
+          onChange={(e) => setExpenseDate(e.target.value)}
         />
       </div>
 
