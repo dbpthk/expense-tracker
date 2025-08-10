@@ -47,8 +47,11 @@ const CreateBudget = ({ refreshData }) => {
   const [budgetAmount, setBudgetAmount] = useState("");
   const [selectedColor, setSelectedColor] = useState(COLOR_OPTIONS[0].hex);
   const { user } = useUser();
+  const [createdDate, setCreatedDate] = useState(moment().format("YYYY-MM-DD")); // ISO format for <input type="date">
 
   const onCreateBudget = async () => {
+    const formattedDate = moment(createdDate).format("DD/MM/YYYY"); //
+
     const result = await db
       .insert(Budgets)
       .values({
@@ -57,7 +60,7 @@ const CreateBudget = ({ refreshData }) => {
         createdBy: user.primaryEmailAddress.emailAddress,
         icon: emoji,
         color: selectedColor,
-        createdAt: moment().format("DD/MM/YYYY"),
+        createdAt: formattedDate,
       })
       .returning({ insertedId: Budgets.id });
 
@@ -69,6 +72,7 @@ const CreateBudget = ({ refreshData }) => {
       setEmoji("😀");
       setSelectedColor(COLOR_OPTIONS[0].hex);
       setOpenEmojiPicker(false);
+      setCreatedDate(moment().format("YYYY-MM-DD"));
     }
   };
 
@@ -127,6 +131,15 @@ const CreateBudget = ({ refreshData }) => {
                     placeholder="e.g. 500"
                     onChange={(e) => setBudgetAmount(e.target.value)}
                     value={budgetAmount}
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <h2 className="text-black font-medium my-1">Select Date</h2>
+                  <Input
+                    type="date"
+                    value={createdDate}
+                    onChange={(e) => setCreatedDate(e.target.value)}
                   />
                 </div>
 
