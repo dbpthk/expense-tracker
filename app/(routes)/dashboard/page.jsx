@@ -18,7 +18,7 @@ const Dashboard = () => {
     <div className="pt-15 p-8 pb-20 flex flex-col gap-7">
       <div>
         <h2 className="font-bold text-3xl">Hi, {user?.fullName}</h2>
-        <p className="text-gray-500">
+        <p className="text-gray-500 tracking-wide">
           Here’s what’s happening with your money — let’s take control.
         </p>
       </div>

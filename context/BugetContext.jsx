@@ -18,11 +18,14 @@ export const BudgetProvider = ({ children }) => {
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpend, setTotalSpend] = useState(0);
 
+  //refresh data
+  const [refresh, setReferesh] = useState(0);
+
   useEffect(() => {
     if (user && isLoaded) {
       getBudgetList();
     }
-  }, [user, isLoaded]);
+  }, [user, isLoaded, refresh]);
 
   const getBudgetList = async () => {
     try {
@@ -91,6 +94,7 @@ export const BudgetProvider = ({ children }) => {
         isLoaded,
         totalBudget,
         totalSpend,
+        setReferesh,
       }}
     >
       {children}

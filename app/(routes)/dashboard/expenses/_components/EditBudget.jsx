@@ -35,8 +35,8 @@ const colorOptions = [
 const EditBudget = ({ budgetInfo, refreshData }) => {
   const [emoji, setEmoji] = useState();
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
-  const [budgetName, setBudgetName] = useState();
-  const [budgetAmount, setBudgetAmount] = useState();
+  const [budgetName, setBudgetName] = useState("");
+  const [budgetAmount, setBudgetAmount] = useState(0);
   const [color, setColor] = useState("");
 
   useEffect(() => {

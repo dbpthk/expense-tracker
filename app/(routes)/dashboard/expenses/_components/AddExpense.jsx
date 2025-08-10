@@ -8,12 +8,15 @@ import { toast } from "sonner";
 import { toTitleCase } from "@/lib/utils";
 import moment from "moment";
 import { Loader } from "lucide-react";
+import { useBudget } from "@/context/BugetContext";
+import { eq } from "drizzle-orm";
 
 const AddExpense = ({ budgetId, refreshData, refereshExpenses, expType }) => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [color, setColor] = useState("");
+  const { setReferesh } = useBudget();
 
   // Fetch budget color by budgetId
   useEffect(() => {
@@ -61,6 +64,7 @@ const AddExpense = ({ budgetId, refreshData, refereshExpenses, expType }) => {
         toast("New Expense Added!");
         refreshData();
         refereshExpenses();
+        setReferesh((prev) => prev + 1);
         setName("");
         setAmount("");
       }

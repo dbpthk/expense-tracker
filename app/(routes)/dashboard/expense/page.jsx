@@ -19,24 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
 const Expense = () => {
-  const { expensesList, budgetList } = useBudget();
+  const { expensesList, budgetList, getBudgetList } = useBudget();
   const [monthOffset, setMonthOffset] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const router = useRouter();
-
-  const handleCategoryClick = (category) => {
-    // Find budget by category name to get budget id
-    const budget = budgetList.find((b) => b.name === category);
-    if (budget) {
-      router.push(`/dashboard/budgets/${budget.id}`);
-    } else {
-      // Optional: handle case if budget not found
-      console.warn("Budget not found for category:", category);
-    }
-  };
 
   const currentMonth = moment().add(monthOffset, "months").format("MMMM YYYY");
 
@@ -179,6 +166,7 @@ const Expense = () => {
               <PieChart>
                 <Pie
                   data={pieData}
+                  className="text-[9px] sm:text-[11px]"
                   dataKey="value"
                   nameKey="name"
                   cx="50%"
@@ -221,6 +209,8 @@ const Expense = () => {
                   </div>
 
                   {Object.entries(categories).map(([category, expenses]) => {
+                    // Get the budget id from the first expense in that category (assuming all have same budgetId)
+                    const budgetId = expenses[0]?.budgetId;
                     const totalForCategory = expenses.reduce(
                       (sum, e) => sum + e.amount,
                       0
@@ -228,10 +218,12 @@ const Expense = () => {
                     const categoryColor = getCategoryColor(category);
 
                     return (
-                      <div
+                      <Link
                         key={category}
-                        onClick={() => handleCategoryClick(category)}
-                        className="cursor-pointer hover:bg-gray-50 border-b border-gray-200 last:border-none px-6 py-3"
+                        href={
+                          budgetId ? `/dashboard/expenses/${budgetId}` : "#"
+                        }
+                        className="block cursor-pointer hover:bg-gray-50 border-b border-gray-200 last:border-none px-6 py-3"
                         style={{ color: categoryColor }}
                       >
                         <h3
@@ -264,8 +256,7 @@ const Expense = () => {
                             </li>
                           ))}
                         </ul>
-                      </div>
-                      // </div>
+                      </Link>
                     );
                   })}
                 </div>

@@ -11,7 +11,7 @@ const Footer = () => {
         <p className="text-center text-sm max-w-md flex flex-col md:flex-row items-center justify-center gap-2">
           For any inquiries, please reach out to us at
           <a
-            href="mailto:support@expensigo.com"
+            href="mailto:dpthk2024@gmail.com"
             className="inline-flex items-center text-primary hover:underline"
           >
             <Mail className="w-5 h-5 mr-1" />
