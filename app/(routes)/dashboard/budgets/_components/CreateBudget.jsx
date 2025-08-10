@@ -35,6 +35,9 @@ const COLOR_OPTIONS = [
   { name: "gray", hex: "#6B7280" },
   { name: "lime", hex: "#84CC16" },
   { name: "cyan", hex: "#06B6D4" },
+  { name: "lavender", hex: "#8884d8" },
+  { name: "lightGreen", hex: "#82ca9d" },
+  { name: "gold", hex: "#ffc658" },
 ];
 
 const CreateBudget = ({ refreshData }) => {

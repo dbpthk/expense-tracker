@@ -22,14 +22,21 @@ import { toTitleCase } from "@/lib/utils";
 
 // Use the same color options as CreateBudget
 const colorOptions = [
-  "#8884d8",
-  "#82ca9d",
-  "#ffc658",
-  "#ff8042",
-  "#00C49F",
-  "#FFBB28",
-  "#3b82f6",
-  "#ef4444",
+  "#3B82F6", // blue
+  "#EF4444", // red
+  "#10B981", // green
+  "#FACC15", // yellow
+  "#8B5CF6", // purple
+  "#F97316", // orange
+  "#14B8A6", // teal
+  "#EC4899", // pink
+  "#6366F1", // indigo
+  "#6B7280", // gray
+  "#84CC16", // lime
+  "#06B6D4", // cyan
+  "#8884d8", // extra lavender from second set
+  "#82ca9d", // extra light green
+  "#ffc658", // extra yellow/gold
 ];
 
 const EditBudget = ({ budgetInfo, refreshData }) => {
