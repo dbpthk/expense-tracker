@@ -8,6 +8,7 @@ import { Budgets } from "@/utils/schema";
 import { eq } from "drizzle-orm";
 import { useRouter } from "next/navigation";
 import { Toaster } from "@/components/ui/sonner";
+import Footer from "./_components/Footer.jsx";
 
 const DashboardLayout = ({ children }) => {
   const { user } = useUser();

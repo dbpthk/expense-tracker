@@ -3,11 +3,12 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import FeatureCard from "../(routes)/dashboard/_components/FeatureCard";
+import Footer from "../(routes)/dashboard/_components/Footer";
 
 const Hero = () => {
   return (
     <>
-      <section className="bg-white px-5 mt-12 flex flex-col gap-15">
+      <section className="bg-white mt-12 flex flex-col gap-15">
         <div className=" flex flex-col justify-center items-center gap-5 md:gap-2">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl tracking-[-2px]">
@@ -56,8 +57,8 @@ const Hero = () => {
               />
             </div>
           </div>
-          <div className="flex justify-center">
-            <div className="mb-20 flex flex-col lg:flex-row lg:justify-between lg:items-center max-w-[1200px]">
+          <div className=" px-5 flex justify-center">
+            <div className="mb-15 flex flex-col lg:flex-row lg:justify-between lg:items-center max-w-[1200px]">
               <h1 className="font-medium tracking-wide text-2xl lg:text-3xl text-[#009ffc] mb-6">
                 What Expensigo Offers
               </h1>
@@ -66,6 +67,7 @@ const Hero = () => {
             </div>
           </div>
         </div>
+        <Footer className="w-full" />
       </section>
     </>
   );
