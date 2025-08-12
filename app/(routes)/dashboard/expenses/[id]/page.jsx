@@ -142,13 +142,27 @@ const ExpenseItem = ({ params }) => {
           )}
 
           {budgetInfo ? (
+            // <AddExpense
+            //   budgetId={id}
+            //   expType={budgetInfo.name}
+            //   user={user}
+            //   refreshData={getBudgetInfo}
+            //   refereshExpenses={getExpensesList}
+            //   color={budgetInfo.color} // pass color here too
+            //   budgetAmount={budgetInfo.amount}
+            //   totalSpent={budgetInfo.totalSpend}
+            // />
             <AddExpense
               budgetId={id}
               expType={budgetInfo.name}
-              user={user}
+              budgetAmount={budgetInfo.amount}
+              currentTotalExpenses={
+                Array.isArray(expensesList)
+                  ? expensesList.reduce((acc, e) => acc + e.amount, 0)
+                  : 0
+              }
               refreshData={getBudgetInfo}
               refereshExpenses={getExpensesList}
-              color={budgetInfo.color} // pass color here too
             />
           ) : (
             <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>

@@ -8,7 +8,7 @@ import Footer from "../(routes)/dashboard/_components/Footer";
 const Hero = () => {
   return (
     <>
-      <section className="bg-white mt-12 flex flex-col gap-15">
+      <section className="bg-white mt-12 flex flex-col gap-15 overflow-hidden">
         <div className=" flex flex-col justify-center items-center gap-5 md:gap-2">
           <div className="flex flex-col justify-center items-center">
             <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl tracking-[-2px]">
@@ -18,48 +18,46 @@ const Hero = () => {
                 Simplified{" "}
               </strong>
             </h1>
-            <p className="mt-4 text-base text-pretty text-gray-700 sm:text-lg/relaxed text-center tracking-wider">
-              See what's possible with a clean, simple expense tracker.
+            <p className="mt-4 text-sm text-pretty text-gray-700 sm:text-sm/relaxed text-center tracking-wider">
+              See what's possible with a clean, simple budget and expense
+              tracker.
             </p>
           </div>
-          <div className="flex justify-center gap-4 sm:mt-6">
+          <div className="flex flex-col justify-center items-center gap-3 sm:mt-6">
             <Link href={"/sign-in"}>
-              <div className="rounded-full border-none bg-[#009ffc] px-7 py-[10px] font-medium  text-white text-xl shadow-xl tracking-wide transition-all duration-300 ease-linear hover:bg-[#0089ff] hover:scale-[1.05] cursor-pointer">
-                GET STARTED FOR FREE
+              <div className="rounded-lg bg-gradient-to-r from-blue-600 via-cyan-500 to-green-600 px-7 py-3 transition transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl hover:brightness-110 cursor-pointer select-none">
+                <h1 className="font-semibold text-white text-lg md:text-xl tracking-wide">
+                  GET STARTED FOR FREE
+                </h1>
               </div>
             </Link>
+            <p className="text-gray-500 text-sm">No credit card required</p>
           </div>
         </div>
 
-        <div className=" flex flex-col gap-15">
+        <div className=" flex flex-col gap-20">
           <div className="flex w-full items-center justify-center px-5">
-            <div className="flex flex-col gap-2">
-              <p className="text-gray-700 pl-1 text-sm">Demo View</p>
-              {/* desktop  */}
-              <Image
-                className=" rounded-xl border-2 hidden md:block drop-shadow-xl"
-                src={"/dashboard.png"}
-                alt="dashboard"
-                width={1200}
-                height={900}
-                quality={100}
-                priority
-              />
-              {/* mobile  */}
-              <Image
-                className="block md:hidden rounded-xl border-2 drop-shadow-xl"
-                src={"/mDashboard.jpg"}
-                alt="dashboard"
-                width={300}
-                height={900}
-                quality={100}
-                priority
-              />
+            <div className="flex flex-col gap-4 w-full justify-center items-center">
+              <p className=" text-gray-500 text-xs sm:text-sm">Demo View</p>
+
+              <div className="flex flex-wrap px-5 w-full justify-center items-center">
+                {/* MacBook Dashboard container */}
+                <div className="relative z-0 max-w-[600px] w-full aspect-[750/431]">
+                  <Image
+                    src="/dashboard.png"
+                    alt="Dashboard"
+                    fill
+                    className="object-contain"
+                    priority
+                    unoptimized
+                  />
+                </div>
+              </div>
             </div>
           </div>
           <div className=" px-5 flex justify-center">
-            <div className="mb-15 flex flex-col lg:flex-row lg:justify-between lg:items-center max-w-[1200px]">
-              <h1 className="font-medium tracking-wide text-2xl lg:text-3xl text-[#009ffc] mb-6">
+            <div className=" flex flex-col items-center max-w-[1200px] gap-5">
+              <h1 className="font-medium tracking-tight text-2xl md:text-4xl text-black">
                 What Expensigo Offers
               </h1>
 

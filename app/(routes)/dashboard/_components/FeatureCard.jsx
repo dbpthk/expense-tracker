@@ -36,17 +36,17 @@ const features = [
 
 const FeatureCard = () => {
   return (
-    <section className="max-w-5xl mx-auto p-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <section className="p-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-[1200px] mx-auto w-full">
       {features.map(({ title, description, icon: Icon }) => (
         <div
           key={title}
           className="flex flex-col items-center p-5 border rounded-lg shadow hover:shadow-lg transition-shadow bg-white"
         >
-          <Icon className="text-[#009ffc] w-12 h-12 mb-4" />
-          <h3 className="text-lg text-primary font-semibold mb-2 text-center tracking-tight">
+          <Icon className="text-primary w-12 h-12 mb-4" />
+          <h3 className="text-lg text-primary font-medium mb-2 text-center tracking-tight">
             {title}
           </h3>
-          <p className="text-gray-600 text-center tracking-wide">
+          <p className="text-gray-600 text-center tracking-wider">
             {description}
           </p>
         </div>
