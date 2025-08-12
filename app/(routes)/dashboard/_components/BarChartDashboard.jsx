@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
-  Legend,
   Tooltip,
   XAxis,
   YAxis,
@@ -21,16 +20,31 @@ const BarChartDashboard = ({ budgetList }) => {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
+  // Add 'remaining' field = budget amount - spent (safe to 0 min)
+  const chartData = budgetList.map((item) => ({
+    ...item,
+    remaining: Math.max(0, item.amount - (item.totalSpend || 0)),
+    totalSpend: item.totalSpend || 0,
+  }));
+
   const CustomLegend = () => {
     return (
       <ul className="flex gap-4 px-4 text-sm">
         <li className="flex items-center gap-2">
-          <span className="w-3 h-3 bg-red-500 inline-block rounded-sm"></span>
+          <span
+            className="w-3 h-3 inline-block rounded-sm"
+            style={{
+              backgroundColor: "#000000" /* you can pick a color here */,
+            }}
+          ></span>
           <span>Spent So Far</span>
         </li>
         <li className="flex items-center gap-2">
-          <span className="w-3 h-3 bg-green-500 inline-block rounded-sm"></span>
-          <span>Your Budget</span>
+          <span
+            className="w-3 h-3 inline-block rounded-sm"
+            style={{ backgroundColor: "#cccccc" /* lighter shade */ }}
+          ></span>
+          <span>Remaining Budget</span>
         </li>
       </ul>
     );
@@ -48,58 +62,67 @@ const BarChartDashboard = ({ budgetList }) => {
       <div className="min-w-[340px] sm:w-[80%] px-5">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
-            className="outline-none "
-            data={budgetList}
-            margin={{ top: 5, right: 5, bottom: 5 }}
+            className="outline-none"
+            data={chartData}
+            margin={{ top: 5, right: 5, bottom: 20 }}
             barCategoryGap={isSmallScreen ? 20 : 10}
           >
             <XAxis
               dataKey="name"
-              angle={-45}
-              tick={{ fontSize: isSmallScreen ? 8 : 12 }}
+              angle={-75}
+              tick={{ fontSize: isSmallScreen ? 8 : 10 }}
               height={90}
               textAnchor="end"
             />
-            <YAxis tick={{ fontSize: isSmallScreen ? 8 : 12 }} />
-            {/* <Tooltip /> */}
+            <YAxis tick={{ fontSize: isSmallScreen ? 8 : 10 }} />
             <Tooltip
-              contentStyle={{ fontSize: "9px" }} // Overall tooltip box
-              labelStyle={{ fontSize: "12px" }} // The label (e.g., category name)
+              contentStyle={{ fontSize: "9px" }}
+              labelStyle={{ fontSize: "12px" }}
+              formatter={(value, name) => [`$${value}`, name]}
             />
+            <CustomLegend />
 
-            {/* Bar for "Spent So Far" with color shades */}
+            {/* Spent So Far (100% opacity) */}
             <Bar
               dataKey="totalSpend"
               name="Spent So Far"
-              className="text-chart-1"
               stackId="a"
-              barSize={isSmallScreen ? 5 : 20}
+              barSize={isSmallScreen ? 5 : 10}
+              isAnimationActive={false}
+              // Use a custom shape to avoid rendering bars when value is 0
+              // or better: set totalSpend to 0 if it's falsy (already done in data mapping)
             >
-              {budgetList.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell
-                  key={`cell-spend-${index}`}
-                  fill={entry.color || "#009857"}
+                  key={`cell-spent-${index}`}
+                  fill={
+                    entry.totalSpend > 0
+                      ? entry.color || "#22c55e"
+                      : "transparent"
+                  }
                 />
               ))}
             </Bar>
 
-            {/* Bar for "Your Budget" with lighter color shades */}
+            {/* Remaining Budget (same color with low opacity) */}
             <Bar
-              dataKey="amount"
-              name="Your Budget"
+              dataKey="remaining"
+              name="Remaining Budget"
               stackId="a"
               barSize={isSmallScreen ? 10 : 20}
             >
-              {budgetList.map((entry, index) => (
-                <Cell
-                  key={`cell-budget-${index}`}
-                  fill={
-                    entry.color
-                      ? `${entry.color}99` // apply ~60% opacity as a shade
-                      : "#89d6a4"
-                  }
-                />
-              ))}
+              {chartData.map((entry, index) => {
+                // Add opacity to hex color by appending '66' (40% opacity)
+                const colorWithOpacity = entry.color
+                  ? `${entry.color}66`
+                  : "#86efac66";
+                return (
+                  <Cell
+                    key={`cell-remaining-${index}`}
+                    fill={colorWithOpacity}
+                  />
+                );
+              })}
             </Bar>
           </BarChart>
         </ResponsiveContainer>

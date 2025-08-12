@@ -37,12 +37,10 @@ const Expense = () => {
     });
   }, [expensesList, currentMonth, searchTerm]);
 
-  // New: total spending for current month
   const totalCurrentMonth = useMemo(() => {
     return filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
   }, [filteredExpenses]);
 
-  // New: total spending all time (till date)
   const totalTillDate = useMemo(() => {
     return expensesList.reduce((sum, exp) => sum + exp.amount, 0);
   }, [expensesList]);
@@ -72,19 +70,37 @@ const Expense = () => {
     }));
   }, [filteredExpenses]);
 
+  // Updated pieData with "Other Expenses" for categories < 5%
   const pieData = useMemo(() => {
     const totals = {};
     filteredExpenses.forEach((expense) => {
       if (!totals[expense.category]) totals[expense.category] = 0;
       totals[expense.category] += expense.amount;
     });
-    return Object.entries(totals).map(([category, amount]) => ({
-      name: category,
-      value: amount,
-    }));
+
+    const totalAmount = Object.values(totals).reduce((a, b) => a + b, 0);
+
+    const mainCategories = [];
+    let otherTotal = 0;
+
+    Object.entries(totals).forEach(([category, amount]) => {
+      const percent = amount / totalAmount;
+      if (percent < 0.05) {
+        otherTotal += amount;
+      } else {
+        mainCategories.push({ name: category, value: amount });
+      }
+    });
+
+    if (otherTotal > 0) {
+      mainCategories.push({ name: "Other Expenses", value: otherTotal });
+    }
+
+    return mainCategories;
   }, [filteredExpenses]);
 
   const getCategoryColor = (category) => {
+    if (category === "Other Expenses") return "#999999"; // Gray for Others
     const match = budgetList.find((b) => b.name === category);
     return match?.color || "#8884d8";
   };
@@ -183,6 +199,11 @@ const Expense = () => {
             </ResponsiveContainer>
           </div>
 
+          {/* Note about Other Expenses */}
+          <div className="text-sm text-center text-gray-600 mb-2 italic">
+            Categories below 5% are grouped as <strong>Other Expenses</strong>.
+          </div>
+
           <div className="w-full h-64 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -231,7 +252,6 @@ const Expense = () => {
                   </div>
 
                   {Object.entries(categories).map(([category, expenses]) => {
-                    // Get the budget id from the first expense in that category (assuming all have same budgetId)
                     const budgetId = expenses[0]?.budgetId;
                     const totalForCategory = expenses.reduce(
                       (sum, e) => sum + e.amount,
