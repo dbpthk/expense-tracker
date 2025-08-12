@@ -2,6 +2,7 @@
 import React from "react";
 import { useEffect } from "react";
 import { Mail } from "lucide-react";
+import EmailLink from "../_components/EmailLink";
 
 const Page = () => {
   useEffect(() => {
@@ -30,13 +31,7 @@ const Page = () => {
         <p className="mb-2 text-gray-700">
           For any suggestions or inquiries, feel free to reach out to us at
         </p>
-        <a
-          href="mailto:dpthk2024@gmail.com"
-          className="inline-flex items-center justify-center text-primary font-semibold hover:underline"
-        >
-          <Mail className="w-5 h-5 mr-2" />
-          dpthk2024@gmail.com
-        </a>
+        <EmailLink />
       </div>
     </div>
   );
