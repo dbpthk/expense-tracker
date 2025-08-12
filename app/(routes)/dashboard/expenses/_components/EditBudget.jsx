@@ -129,12 +129,14 @@ const EditBudget = ({ budgetInfo, refreshData }) => {
 
                 <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2">
                   {openEmojiPicker && (
-                    <EmojiPicker
-                      onEmojiClick={(emojiData) => {
-                        setEmoji(emojiData.emoji);
-                        setOpenEmojiPicker(false);
-                      }}
-                    />
+                    <div style={{ transform: "scale(0.6)" }}>
+                      <EmojiPicker
+                        onEmojiClick={(emojiData) => {
+                          setEmoji(emojiData.emoji);
+                          setOpenEmojiPicker(false);
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
 
