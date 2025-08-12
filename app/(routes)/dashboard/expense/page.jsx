@@ -37,6 +37,16 @@ const Expense = () => {
     });
   }, [expensesList, currentMonth, searchTerm]);
 
+  // New: total spending for current month
+  const totalCurrentMonth = useMemo(() => {
+    return filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+  }, [filteredExpenses]);
+
+  // New: total spending all time (till date)
+  const totalTillDate = useMemo(() => {
+    return expensesList.reduce((sum, exp) => sum + exp.amount, 0);
+  }, [expensesList]);
+
   const groupedByDate = useMemo(() => {
     const grouped = {};
     filteredExpenses.forEach((expense) => {
@@ -86,9 +96,21 @@ const Expense = () => {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto p-4 sm:p-6">
-      <h2 className="text-3xl font-extrabold mb-4 text-gray-900">
-        Expenses Overview – {currentMonth}
-      </h2>
+      <div>
+        <h2 className="text-3xl font-extrabold mb-4 text-gray-900 text-center">
+          Expenses Overview – {currentMonth}
+        </h2>
+        <div className="flex justify-between bg-[#3B82F6] p-3 items-center mb-2">
+          <div className="text-sm tracking-tight font-medium text-white text-left">
+            Monthly Expenditure ({currentMonth}):{" "}
+            <span className="text-white">${totalCurrentMonth.toFixed(2)}</span>
+          </div>
+          <div className="text-sm tracking-tight font-medium text-white text-right">
+            All-Time Spending:{" "}
+            <span className="text-white">${totalTillDate.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
 
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex gap-2">

@@ -73,7 +73,7 @@ const BarChartDashboard = ({ budgetList }) => {
               name="Spent So Far"
               className="text-chart-1"
               stackId="a"
-              barSize={isSmallScreen ? 10 : 20}
+              barSize={isSmallScreen ? 5 : 20}
             >
               {budgetList.map((entry, index) => (
                 <Cell
