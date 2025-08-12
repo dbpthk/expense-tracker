@@ -80,15 +80,47 @@ const PieChartDashboard = ({ budgetList = [] }) => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full p-4 border rounded-lg gap-15">
+    <>
       {budgetData.length > 0 ? (
-        <BudgetsPie data={budgetData} onClick={handlePieClick} />
+        <div className="flex flex-col items-center w-full p-4 border rounded-lg gap-8">
+          <BudgetsPie data={budgetData} onClick={handlePieClick} />
+        </div>
       ) : (
-        <div className="text-center text-muted-foreground py-10">
-          No budget data available to display chart.
+        <div className="flex flex-col items-center justify-center p-10 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-12 w-12 mb-4 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+            />
+            <path
+              d="M12 2v10l6 6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <h2 className="text-lg font-semibold mb-1">
+            No Budget Data Available
+          </h2>
+          <p className="text-sm text-center max-w-xs">
+            There is no budget data to display the pie chart. Please add budgets
+            to see your expense breakdown.
+          </p>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

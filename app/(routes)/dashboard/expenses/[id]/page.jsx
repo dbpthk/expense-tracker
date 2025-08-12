@@ -142,16 +142,6 @@ const ExpenseItem = ({ params }) => {
           )}
 
           {budgetInfo ? (
-            // <AddExpense
-            //   budgetId={id}
-            //   expType={budgetInfo.name}
-            //   user={user}
-            //   refreshData={getBudgetInfo}
-            //   refereshExpenses={getExpensesList}
-            //   color={budgetInfo.color} // pass color here too
-            //   budgetAmount={budgetInfo.amount}
-            //   totalSpent={budgetInfo.totalSpend}
-            // />
             <AddExpense
               budgetId={id}
               expType={budgetInfo.name}

@@ -24,6 +24,8 @@ const ExpenseListTable = ({ expensesList, refreshData }) => {
       console.error("Delete expense error:", error);
     }
   };
+  const isLoading = !expensesList; // or expensesList === undefined || expensesList === null
+  const isEmpty = Array.isArray(expensesList) && expensesList.length === 0;
 
   return (
     <div>
@@ -35,33 +37,41 @@ const ExpenseListTable = ({ expensesList, refreshData }) => {
         <h2 className="text-center">Action</h2>
       </div>
 
-      {Array.isArray(expensesList) && expensesList.length > 0
-        ? expensesList.slice(0, 5).map((expense) => (
-            <div
-              key={expense.id}
-              className="grid grid-cols-4 gap-5 bg-neutral-background p-2 pl-6 text-sm md:text-base border-b border-gray-200"
-            >
-              <h2>{toTitleCase(expense.name)}</h2>
-              <h2>${expense.amount.toFixed(2)}</h2>
-              <h2>{expense.createdAt}</h2>
-              <h2 className="flex justify-center">
-                <Trash
-                  className="text-red-600 h-5 md:h-6 cursor-pointer"
-                  onClick={() => deleteExpense(expense)}
-                  title="Delete expense"
-                  aria-label="Delete expense"
-                />
-              </h2>
-            </div>
-          ))
-        : Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="w-full h-4 bg-[#9aecb729] rounded-lg animate-pulse my-1"
-            />
-          ))}
+      {isLoading ? (
+        // Loading skeleton
+        Array.from({ length: 5 }).map((_, index) => (
+          <div
+            key={index}
+            className="w-full h-4 bg-[#9aecb729] rounded-lg animate-pulse my-1"
+          />
+        ))
+      ) : isEmpty ? (
+        // No data message
+        <div className="text-center p-10 text-gray-500 italic">
+          No expenses found.
+        </div>
+      ) : (
+        // Show expense rows
+        expensesList.slice(0, 5).map((expense) => (
+          <div
+            key={expense.id}
+            className="grid grid-cols-4 gap-5 bg-neutral-background p-2 pl-6 text-sm md:text-base border-b border-gray-200"
+          >
+            <h2>{toTitleCase(expense.name)}</h2>
+            <h2>${expense.amount.toFixed(2)}</h2>
+            <h2>{expense.createdAt}</h2>
+            <h2 className="flex justify-center">
+              <Trash
+                className="text-red-600 h-5 md:h-6 cursor-pointer"
+                onClick={() => deleteExpense(expense)}
+                title="Delete expense"
+                aria-label="Delete expense"
+              />
+            </h2>
+          </div>
+        ))
+      )}
     </div>
   );
 };
-
 export default ExpenseListTable;
