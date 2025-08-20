@@ -8,29 +8,56 @@ const CardInfo = ({ budgetList }) => {
   return (
     <>
       {budgetList ? (
-        <div className=" grid grid-col-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div className=" p-7 border rounded-lg flex items-center justify-between">
-            <div>
-              <h2 className="text-sm">Total Budget</h2>
-              <h2 className="text-2xl font-bold text-primary">
-                ${totalBudget}
-              </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="p-6 border border-gray-200 rounded-xl bg-gradient-to-br from-green-50 to-green-100 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <h2 className="text-sm font-medium text-gray-600">
+                  Total Budget
+                </h2>
+                <h2 className="text-3xl font-bold text-green-700">
+                  ${totalBudget?.toLocaleString() || "0"}
+                </h2>
+                <p className="text-xs text-green-600">Available to spend</p>
+              </div>
+              <div className="p-3 bg-green-500 rounded-full shadow-lg">
+                <PiggyBank className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <PiggyBank className="bg-primary text-white h-12 w-13 p-2 rounded-full" />
           </div>
-          <div className=" p-7 border rounded-lg flex items-center justify-between">
-            <div>
-              <h2 className="text-sm">Total Spent</h2>
-              <h2 className="text-2xl font-bold text-chart-1">${totalSpend}</h2>
+
+          <div className="p-6 border border-gray-200 rounded-xl bg-gradient-to-br from-red-50 to-red-100 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <h2 className="text-sm font-medium text-gray-600">
+                  Total Spent
+                </h2>
+                <h2 className="text-3xl font-bold text-red-700">
+                  ${totalSpend?.toLocaleString() || "0"}
+                </h2>
+                <p className="text-xs text-red-600">Money spent</p>
+              </div>
+              <div className="p-3 bg-red-500 rounded-full shadow-lg">
+                <ReceiptText className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <ReceiptText className="bg-chart-1 text-white h-12 w-13 p-2 rounded-full" />
           </div>
-          <div className=" p-7 border rounded-lg flex items-center justify-between">
-            <div>
-              <h2 className="text-sm">Number of Budgets</h2>
-              <h2 className="text-2xl font-bold">{budgetList?.length}</h2>
+
+          <div className="p-6 border border-gray-200 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <h2 className="text-sm font-medium text-gray-600">
+                  Active Budgets
+                </h2>
+                <h2 className="text-3xl font-bold text-blue-700">
+                  {budgetList?.length || "0"}
+                </h2>
+                <p className="text-xs text-blue-600">Budgets tracked</p>
+              </div>
+              <div className="p-3 bg-blue-500 rounded-full shadow-lg">
+                <Wallet className="h-8 w-8 text-white" />
+              </div>
             </div>
-            <Wallet className="bg-primary text-white h-12 w-13 p-2 rounded-full" />
           </div>
         </div>
       ) : (

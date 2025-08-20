@@ -1,10 +1,7 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import db from "@/utils/dbConfig";
-import { sql } from "drizzle-orm";
-import { eq, desc, getTableColumns } from "drizzle-orm";
-import { Budgets, Expenses } from "@/utils/schema";
+import { useNotifications } from "./NotificationContext";
 
 const BudgetContext = createContext();
 
@@ -12,6 +9,7 @@ export const useBudget = () => useContext(BudgetContext);
 
 export const BudgetProvider = ({ children }) => {
   const { user, isLoaded } = useUser();
+  const { triggerNotificationCheck } = useNotifications();
 
   const [budgetList, setBudgetList] = useState([]);
   const [expensesList, setExpensesList] = useState([]);
@@ -29,43 +27,38 @@ export const BudgetProvider = ({ children }) => {
 
   const getBudgetList = async () => {
     try {
-      const result = await db
-        .select({
-          ...getTableColumns(Budgets), // includes color if in schema
-          totalSpend: sql`COALESCE(SUM(${Expenses.amount}), 0)`.mapWith(Number),
-          totalItem: sql`COUNT(${Expenses.id})`.mapWith(Number),
-        })
-        .from(Budgets)
-        .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-        .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-        .groupBy(Budgets.id)
-        .orderBy(desc(Budgets.id));
-
-      setBudgetList(result);
-      // Calculate totals based on fetched budgets
-      calculateCardInfo(result);
-      getAllExpenses();
+      const response = await fetch(
+        `/api/budgets?email=${user?.primaryEmailAddress?.emailAddress}`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setBudgetList(result);
+        // Calculate totals based on fetched budgets
+        calculateCardInfo(result);
+        // Pass the current budgets to getAllExpenses to ensure notifications are triggered with fresh data
+        getAllExpenses(result);
+      }
     } catch (error) {
       console.error("Error fetching budgets:", error);
     }
   };
 
-  const getAllExpenses = async () => {
+  const getAllExpenses = async (currentBudgets = null) => {
     try {
-      const result = await db
-        .select({
-          id: Expenses.id,
-          name: Expenses.name,
-          amount: Expenses.amount,
-          createdAt: Expenses.createdAt,
-          budgetId: Expenses.budgetId,
-          category: Budgets.name,
-        })
-        .from(Budgets)
-        .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-        .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-        .orderBy(desc(Expenses.id));
-      setExpensesList(result);
+      const response = await fetch(
+        `/api/expenses?email=${user?.primaryEmailAddress?.emailAddress}`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setExpensesList(result);
+
+        // Trigger notifications after expenses are loaded
+        // Use passed budgets or current budgetList
+        const budgetsToCheck = currentBudgets || budgetList;
+        setTimeout(() => {
+          triggerNotificationCheck(budgetsToCheck, result);
+        }, 1000);
+      }
     } catch (error) {
       console.error("Error fetching expenses:", error);
     }
@@ -90,6 +83,7 @@ export const BudgetProvider = ({ children }) => {
         budgetList,
         expensesList,
         getBudgetList,
+        getAllExpenses,
         user,
         isLoaded,
         totalBudget,

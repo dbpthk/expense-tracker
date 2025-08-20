@@ -9,6 +9,8 @@ export const Budgets = pgTable("budgets", {
   color: varchar("color").notNull(), // 🎨 new column for selected color
   createdBy: varchar("createdBy").notNull(),
   createdAt: varchar("createdAt").notNull(),
+  timePeriod: varchar("timePeriod").default("monthly"),
+  // Note: totalSpend and updatedAt columns removed as they don't exist in actual database
 });
 
 export const Expenses = pgTable("expenses", {
@@ -20,3 +22,14 @@ export const Expenses = pgTable("expenses", {
   category: varchar("category").notNull(),
   color: varchar("color").notNull(),
 });
+
+export const Categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  icon: varchar("icon").notNull(),
+  color: varchar("color").notNull(),
+  isDefault: integer("isDefault").notNull().default(0), // 0 = custom, 1 = default
+  createdBy: varchar("createdBy").notNull(),
+  createdAt: varchar("createdAt").notNull(),
+});
+// UserSettings table removed as per user request to remove currency functionality

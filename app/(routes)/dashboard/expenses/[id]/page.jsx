@@ -22,8 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import EditBudget from "../_components/EditBudget";
-
+import EditBudget from "../../budgets/_components/EditBudget";
 const ExpenseItem = ({ params }) => {
   const route = useRouter();
   const { id } = use(params);

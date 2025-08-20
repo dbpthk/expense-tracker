@@ -1,12 +1,25 @@
 "use client";
 import { SignUp } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
 
 export default function Page() {
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      router.push("/dashboard");
+    }
+  }, [isLoaded, user, router]);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md">
         <SignUp
           routing="path"
+          redirectUrl="/dashboard"
           appearance={{
             elements: {
               formButtonPrimary:
