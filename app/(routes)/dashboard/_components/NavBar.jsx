@@ -39,6 +39,17 @@ const menuList = [
   },
   { id: 5, name: "Settings", icon: Settings, path: "/dashboard/settings" },
   { id: 6, name: "Upgrade", icon: ShieldCheck, path: "/dashboard/upgrade" },
+  // Development only - remove in production
+  ...(process.env.NODE_ENV === "development"
+    ? [
+        {
+          id: 7,
+          name: "Stripe Test",
+          icon: ShieldCheck,
+          path: "/dashboard/stripe-test",
+        },
+      ]
+    : []),
 ];
 
 const NavBar = () => {

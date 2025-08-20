@@ -83,7 +83,7 @@ const BudgetItem = ({ budget, refreshData }) => {
         },
         body: JSON.stringify({
           name: editData.name,
-          amount: Number(editData.amount),
+          amount: parseFloat(editData.amount),
           icon: editData.icon,
           color: editData.color,
         }),
@@ -105,9 +105,10 @@ const BudgetItem = ({ budget, refreshData }) => {
     }
   };
 
-  const remaining = Number(budget.amount ?? 0) - Number(budget.totalSpend ?? 0);
+  const remaining =
+    parseFloat(budget.amount || 0) - parseFloat(budget.totalSpend || 0);
   const spendingPercentage =
-    (Number(budget.totalSpend ?? 0) / Number(budget.amount ?? 1)) * 100;
+    (parseFloat(budget.totalSpend || 0) / parseFloat(budget.amount || 1)) * 100;
   const isOverBudget = spendingPercentage > 100;
   const isNearLimit = spendingPercentage > 80;
 
@@ -165,7 +166,7 @@ const BudgetItem = ({ budget, refreshData }) => {
         {/* Amount */}
         <div className="text-right flex-shrink-0">
           <h2 className="font-bold text-2xl" style={{ color: budget.color }}>
-            ${budget.amount?.toLocaleString()}
+            ${parseFloat(budget.amount || 0).toLocaleString()}
           </h2>
           <span className="text-xs text-gray-500">Total Budget</span>
         </div>

@@ -46,6 +46,7 @@ const AIInput = ({ onDataParsed, type = "expense" }) => {
       const data = await response.json();
       setParsedData(data);
 
+      console.log("AI parsing successful, calling onDataParsed with:", data);
       if (onDataParsed) {
         onDataParsed(data);
       }
@@ -132,20 +133,25 @@ const AIInput = ({ onDataParsed, type = "expense" }) => {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={`Describe your ${type}...`}
-            className="flex-1"
+            className="flex-1 transition-all duration-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
             disabled={loading}
           />
           <Button
             type="submit"
             disabled={loading || !text.trim()}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 disabled:transform-none"
           >
             {loading ? (
-              <Loader className="w-4 h-4 animate-spin" />
+              <div className="flex items-center gap-2">
+                <Loader className="w-4 h-4 animate-spin" />
+                <span>Parsing...</span>
+              </div>
             ) : (
-              <Sparkles className="w-4 h-4" />
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                <span>Parse</span>
+              </div>
             )}
-            Parse
           </Button>
         </div>
       </form>
@@ -196,9 +202,25 @@ const AIInput = ({ onDataParsed, type = "expense" }) => {
       )}
 
       {loading && (
-        <div className="flex items-center gap-2 text-blue-600">
-          <Loader className="w-4 h-4 animate-spin" />
-          <span>AI is parsing your text...</span>
+        <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2 text-blue-600">
+            <Loader className="w-5 h-5 animate-spin" />
+            <span className="font-medium">AI is parsing your text...</span>
+          </div>
+          <div className="flex space-x-1">
+            <div
+              className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+              style={{ animationDelay: "0ms" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+              style={{ animationDelay: "150ms" }}
+            ></div>
+            <div
+              className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+              style={{ animationDelay: "300ms" }}
+            ></div>
+          </div>
         </div>
       )}
     </div>

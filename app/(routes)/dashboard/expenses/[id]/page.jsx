@@ -1,8 +1,5 @@
 "use client";
-import { sql, eq, and, getTableColumns, desc } from "drizzle-orm";
-import db from "@/utils/dbConfig";
-import { Budgets, Expenses } from "@/utils/schema";
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import BudgetItem from "../../budgets/_components/BudgetItem";
 import AddExpense from "../_components/AddExpense";
@@ -23,12 +20,14 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import EditBudget from "../../budgets/_components/EditBudget";
+
 const ExpenseItem = ({ params }) => {
   const route = useRouter();
-  const { id } = use(params);
+  const { id } = params;
   const { user, isLoaded } = useUser();
   const [budgetInfo, setBudgetInfo] = useState(null);
-  const [expensesList, setExpensesList] = useState();
+  const [expensesList, setExpensesList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user && isLoaded) {
@@ -38,49 +37,81 @@ const ExpenseItem = ({ params }) => {
 
   const getBudgetInfo = async () => {
     try {
-      const result = await db
-        .select({
-          ...getTableColumns(Budgets),
-          totalSpend: sql`SUM(${Expenses.amount})`.mapWith(Number),
-          totalItem: sql`COUNT(${Expenses.id})`.mapWith(Number),
-          color: Budgets.color, // added color fetch
-        })
-        .from(Budgets)
-        .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-        .where(
-          and(
-            eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress),
-            eq(Budgets.id, id)
-          )
-        )
-        .groupBy(Budgets.id);
-
-      setBudgetInfo(result[0]);
-      getExpensesList();
+      setLoading(true);
+      const response = await fetch(
+        `/api/budgets/${id}?email=${user?.primaryEmailAddress?.emailAddress}`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setBudgetInfo(result);
+        getExpensesList();
+      } else {
+        toast.error("Failed to fetch budget info");
+      }
     } catch (error) {
       console.error("Error fetching budget info:", error);
+      toast.error("Error fetching budget info");
+    } finally {
+      setLoading(false);
     }
   };
 
   const getExpensesList = async () => {
-    const result = await db
-      .select()
-      .from(Expenses)
-      .where(eq(Expenses.budgetId, id))
-      .orderBy(desc(Expenses.id));
-    setExpensesList(result);
+    try {
+      const response = await fetch(
+        `/api/expenses?email=${user?.primaryEmailAddress?.emailAddress}`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        // Filter expenses for this specific budget
+        const budgetExpenses = result.filter(
+          (expense) => expense.budgetId === parseInt(id)
+        );
+        setExpensesList(budgetExpenses);
+      } else {
+        toast.error("Failed to fetch expenses");
+      }
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+      toast.error("Error fetching expenses");
+    }
   };
 
   const deleteBudget = async () => {
-    const deleteExpenseResult = await db
-      .delete(Expenses)
-      .where(eq(Expenses.budgetId, id))
-      .returning();
-    if (deleteExpenseResult) {
-      await db.delete(Budgets).where(eq(Budgets.id, id)).returning();
+    try {
+      // Delete expenses first
+      const expensesResponse = await fetch(
+        `/api/expenses?email=${user?.primaryEmailAddress?.emailAddress}`
+      );
+      if (expensesResponse.ok) {
+        const expenses = await expensesResponse.json();
+        const budgetExpenses = expenses.filter(
+          (expense) => expense.budgetId === parseInt(id)
+        );
+
+        // Delete each expense
+        for (const expense of budgetExpenses) {
+          await fetch(`/api/expenses/${expense.id}`, {
+            method: "DELETE",
+          });
+        }
+      }
+
+      // Delete budget
+      const budgetResponse = await fetch(`/api/budgets/${id}`, {
+        method: "DELETE",
+      });
+
+      if (budgetResponse.ok) {
+        toast.success("Budget Deleted");
+        route.replace("/dashboard/budgets");
+      } else {
+        toast.error("Failed to delete budget");
+      }
+    } catch (error) {
+      console.error("Error deleting budget:", error);
+      toast.error("Error deleting budget");
     }
-    toast("Budget Deleted");
-    route.replace("/dashboard/budgets");
   };
 
   return (

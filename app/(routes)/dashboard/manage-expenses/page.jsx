@@ -447,7 +447,7 @@ const ManageExpenses = () => {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <div className="font-bold text-lg text-gray-900">
-                      ${expense.amount?.toFixed(2)}
+                      ${parseFloat(expense.amount || 0).toFixed(2)}
                     </div>
                     <div className="text-sm text-gray-500">
                       {expense.category || "General"}

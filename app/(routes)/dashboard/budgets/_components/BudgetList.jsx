@@ -60,11 +60,11 @@ const BudgetList = () => {
   }
 
   const totalBudget = budgetList.reduce(
-    (sum, budget) => sum + Number(budget.amount),
+    (sum, budget) => sum + parseFloat(budget.amount || 0),
     0
   );
   const totalSpent = budgetList.reduce(
-    (sum, budget) => sum + Number(budget.totalSpend || 0),
+    (sum, budget) => sum + parseFloat(budget.totalSpend || 0),
     0
   );
   const remaining = totalBudget - totalSpent;

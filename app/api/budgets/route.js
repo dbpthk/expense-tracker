@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import db from "@/lib/db";
 import { Budgets, Expenses } from "@/utils/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export async function GET(request) {
   try {
@@ -18,24 +18,45 @@ export async function GET(request) {
       return NextResponse.json({ error: "Email required" }, { status: 400 });
     }
 
-    const result = await db
-      .select({
-        id: Budgets.id,
-        name: Budgets.name,
-        amount: Budgets.amount,
-        icon: Budgets.icon,
-        color: Budgets.color,
-        createdBy: Budgets.createdBy,
-        createdAt: Budgets.createdAt,
-        timePeriod: Budgets.timePeriod,
-        totalSpend: sql`COALESCE(SUM(${Expenses.amount}), 0)`.mapWith(Number),
-        totalItem: sql`COUNT(${Expenses.id})`.mapWith(Number),
-      })
+    // Get budgets first
+    const budgets = await db
+      .select()
       .from(Budgets)
-      .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
       .where(eq(Budgets.createdBy, email))
-      .groupBy(Budgets.id)
       .orderBy(desc(Budgets.id));
+
+    // Get expenses for calculating totalSpend
+    const expenses = await db
+      .select({
+        budgetId: Expenses.budgetId,
+        amount: Expenses.amount,
+      })
+      .from(Expenses);
+
+    // Calculate totalSpend for each budget
+    const result = budgets.map((budget) => {
+      const budgetExpenses = expenses.filter(
+        (exp) => exp.budgetId === budget.id
+      );
+      const totalSpend = budgetExpenses.reduce(
+        (sum, exp) => sum + parseFloat(exp.amount || 0),
+        0
+      );
+      const totalItem = budgetExpenses.length;
+
+      return {
+        id: budget.id,
+        name: budget.name,
+        amount: budget.amount,
+        icon: budget.icon,
+        color: budget.color,
+        createdBy: budget.createdBy,
+        createdAt: budget.createdAt,
+        timePeriod: budget.timePeriod,
+        totalSpend: totalSpend.toString(),
+        totalItem: totalItem,
+      };
+    });
 
     return NextResponse.json(result);
   } catch (error) {
@@ -69,7 +90,7 @@ export async function POST(request) {
       .insert(Budgets)
       .values({
         name,
-        amount: Number(amount),
+        amount: amount.toString(),
         icon: icon || "💰",
         color,
         createdBy,

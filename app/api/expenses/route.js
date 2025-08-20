@@ -11,26 +11,27 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
-
-    if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
-    }
-
-    const result = await db
-      .select({
-        id: Expenses.id,
-        name: Expenses.name,
-        amount: Expenses.amount,
-        createdAt: Expenses.createdAt,
-        budgetId: Expenses.budgetId,
-        category: Budgets.name,
-      })
-      .from(Budgets)
-      .rightJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-      .where(eq(Budgets.createdBy, email))
+    const expenses = await db
+      .select()
+      .from(Expenses)
       .orderBy(desc(Expenses.id));
+
+    const budgets = await db.select().from(Budgets);
+
+    const budgetMap = {};
+    budgets.forEach((budget) => {
+      budgetMap[budget.id] = budget.name;
+    });
+
+    const result = expenses.map((expense) => ({
+      id: expense.id,
+      name: expense.name,
+      amount: expense.amount,
+      createdAt: expense.createdAt,
+      budgetId: expense.budgetId,
+      category: expense.category || budgetMap[expense.budgetId] || "Unknown",
+      color: expense.color,
+    }));
 
     return NextResponse.json(result);
   } catch (error) {
@@ -50,32 +51,33 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { name, amount, budgetId, createdAt, category, color } = body;
+    const { name, amount, budgetId, color } = body;
 
-    if (!name || !amount || !budgetId || !createdAt || !category || !color) {
+    if (!name || !amount || !budgetId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Insert the expense
+    // Get budget name for category
+    const budgets = await db.select().from(Budgets);
+    const budget = budgets.find((b) => b.id === budgetId);
+    const category = budget ? budget.name : "Unknown";
+
     const result = await db
       .insert(Expenses)
       .values({
         name,
-        amount: Number(amount),
-        budgetId: Number(budgetId),
-        createdAt,
+        amount: amount.toString(),
+        budgetId,
         category,
-        color,
+        color: color || "#3B82F6",
+        createdAt: new Date().toISOString().split("T")[0],
       })
       .returning({ insertedId: Expenses.id });
 
-    // Note: totalSpend column update removed temporarily to fix API errors
-    // Will be re-enabled once database migration is complete
-
-    return NextResponse.json(result);
+    return NextResponse.json(result[0]);
   } catch (error) {
     console.error("Error creating expense:", error);
     return NextResponse.json(

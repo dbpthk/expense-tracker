@@ -4,6 +4,34 @@ import db from "@/lib/db";
 import { Expenses } from "@/utils/schema";
 import { eq } from "drizzle-orm";
 
+export async function GET(request, { params }) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = params;
+
+    const result = await db
+      .select()
+      .from(Expenses)
+      .where(eq(Expenses.id, Number(id)));
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: "Expense not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(result[0]);
+  } catch (error) {
+    console.error("Error fetching expense:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(request, { params }) {
   try {
     const { userId } = await auth();
@@ -27,7 +55,7 @@ export async function PUT(request, { params }) {
       .update(Expenses)
       .set({
         name,
-        amount: Number(amount),
+        amount: parseFloat(amount),
         createdAt,
       })
       .where(eq(Expenses.id, Number(id)))

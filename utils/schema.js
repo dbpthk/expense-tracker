@@ -1,10 +1,11 @@
-import { integer } from "drizzle-orm/gel-core";
+import { integer } from "drizzle-orm/pg-core";
 import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
 export const Budgets = pgTable("budgets", {
   id: serial("id").primaryKey(),
   name: varchar("name").notNull(),
-  amount: integer("amount").notNull(),
+  amount: varchar("amount").notNull(), // Use varchar to avoid type conflicts
+
   icon: varchar("icon"),
   color: varchar("color").notNull(), // 🎨 new column for selected color
   createdBy: varchar("createdBy").notNull(),
@@ -16,7 +17,7 @@ export const Budgets = pgTable("budgets", {
 export const Expenses = pgTable("expenses", {
   id: serial("id").primaryKey(),
   name: varchar("name").notNull(),
-  amount: integer("amount").notNull().default(0),
+  amount: varchar("amount").notNull().default("0.00"), // Use varchar to avoid type conflicts
   budgetId: integer("budgetId").references(() => Budgets.id),
   createdAt: varchar("createdAt").notNull(),
   category: varchar("category").notNull(),

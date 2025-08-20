@@ -223,6 +223,26 @@ const UpgradePage = () => {
                 access!
               </div>
             )}
+
+            {/* Development Test Button - Remove in production */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="mt-4">
+                <Button
+                  onClick={() => {
+                    console.log("Current subscription:", subscription);
+                    console.log("Environment check:", {
+                      hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+                      hasPriceId: !!process.env.STRIPE_PRO_PRICE_ID,
+                      hasAppUrl: !!process.env.NEXT_PUBLIC_APP_URL,
+                    });
+                  }}
+                  variant="outline"
+                  size="sm"
+                >
+                  Debug: Check Config
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -136,7 +136,7 @@ const CreateBudget = ({ refreshData, prefillData }) => {
         },
         body: JSON.stringify({
           name: budgetName,
-          amount: Number(budgetAmount),
+          amount: parseFloat(budgetAmount),
           createdBy: user.primaryEmailAddress.emailAddress,
           icon: emoji,
           color: selectedColor,
@@ -198,157 +198,177 @@ const CreateBudget = ({ refreshData, prefillData }) => {
             <DialogTitle className="text-2xl font-bold">
               Create New Budget
             </DialogTitle>
-            <DialogDescription>
-              {/* Budget Limit Indicator */}
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg mb-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-blue-600 rounded-full"></div>
-                    <span className="text-sm font-medium text-blue-800">
-                      {subscription.status === "trial"
-                        ? "Free Trial"
-                        : "Free Plan"}
+            <DialogDescription asChild>
+              <div className="space-y-6">
+                {/* Budget Limit Indicator */}
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-blue-600 rounded-full"></div>
+                      <span className="text-sm font-medium text-blue-800">
+                        {subscription.status === "trial"
+                          ? "Free Trial"
+                          : "Free Plan"}
+                      </span>
+                    </div>
+                    <span className="text-sm text-blue-600">
+                      {getRemainingBudgets(budgetList.length)} of{" "}
+                      {subscription.budgetLimit} budgets remaining
                     </span>
                   </div>
-                  <span className="text-sm text-blue-600">
-                    {getRemainingBudgets(budgetList.length)} of{" "}
-                    {subscription.budgetLimit} budgets remaining
-                  </span>
+                  {subscription.status === "trial" &&
+                    subscription.trialEndsAt && (
+                      <p className="text-xs text-blue-600 mt-1">
+                        Trial ends{" "}
+                        {new Date(
+                          subscription.trialEndsAt
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
                 </div>
-                {subscription.status === "trial" &&
-                  subscription.trialEndsAt && (
-                    <p className="text-xs text-blue-600 mt-1">
-                      Trial ends{" "}
-                      {new Date(subscription.trialEndsAt).toLocaleDateString()}
-                    </p>
-                  )}
-              </div>
 
-              <div className="mt-6 space-y-6">
-                {/* AI Input Section */}
-                <AIInput onDataParsed={handleAIDataParsed} type="budget" />
-                {/* Emoji Picker */}
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="cursor-pointer text-2xl"
-                  onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
-                >
-                  {emoji}
-                </Button>
+                <div className="mt-6 space-y-6">
+                  {/* AI Input Section */}
+                  <AIInput onDataParsed={handleAIDataParsed} type="budget" />
+                  {/* Emoji Picker */}
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="cursor-pointer text-2xl"
+                    onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
+                  >
+                    {emoji}
+                  </Button>
 
-                {openEmojiPicker && (
-                  <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2">
-                    <div className="relative">
-                      <button
-                        onClick={() => setOpenEmojiPicker(false)}
-                        className="absolute top-2 right-2 z-10 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors"
-                      >
-                        ×
-                      </button>
-                      <div style={{ transform: "scale(0.8)" }}>
-                        <EmojiPicker
-                          onEmojiClick={(emojiData) => {
-                            setEmoji(emojiData.emoji);
-                            setOpenEmojiPicker(false);
-                          }}
-                          searchPlaceholder="Search emojis..."
-                          width={300}
-                          height={400}
-                        />
+                  {openEmojiPicker && (
+                    <div className="absolute z-20 left-1/2 -translate-x-1/2 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2">
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenEmojiPicker(false)}
+                          className="absolute top-2 right-2 z-10 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors"
+                        >
+                          ×
+                        </button>
+                        <div style={{ transform: "scale(0.8)" }}>
+                          <EmojiPicker
+                            onEmojiClick={(emojiData) => {
+                              setEmoji(emojiData.emoji);
+                              setOpenEmojiPicker(false);
+                            }}
+                            searchPlaceholder="Search emojis..."
+                            width={300}
+                            height={400}
+                          />
+                        </div>
                       </div>
                     </div>
+                  )}
+
+                  {/* Budget Name */}
+                  <div className="mt-4">
+                    <h3 className="text-black font-medium my-1">Budget Name</h3>
+                    <Input
+                      placeholder="e.g. Grocery"
+                      onChange={(e) =>
+                        setBudgetName(toTitleCase(e.target.value || ""))
+                      }
+                      value={budgetName}
+                    />
                   </div>
-                )}
 
-                {/* Budget Name */}
-                <div className="mt-4">
-                  <h2 className="text-black font-medium my-1">Budget Name</h2>
-                  <Input
-                    placeholder="e.g. Grocery"
-                    onChange={(e) =>
-                      setBudgetName(toTitleCase(e.target.value || ""))
-                    }
-                    value={budgetName}
-                  />
-                </div>
+                  {/* Budget Amount */}
+                  <div className="mt-4">
+                    <h3 className="text-black font-medium my-1">
+                      Budget Amount
+                    </h3>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      max="999999.99"
+                      placeholder="e.g. 500.50"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty value and valid numbers
+                        if (value === "" || !isNaN(parseFloat(value))) {
+                          setBudgetAmount(value);
+                        }
+                      }}
+                      value={budgetAmount}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Enter amount with up to 2 decimal places (e.g., 500.25)
+                    </p>
+                  </div>
 
-                {/* Budget Amount */}
-                <div className="mt-4">
-                  <h2 className="text-black font-medium my-1">Budget Amount</h2>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 500"
-                    onChange={(e) => setBudgetAmount(e.target.value)}
-                    value={budgetAmount}
-                  />
-                </div>
+                  <div className="mt-4">
+                    <h3 className="text-black font-medium my-1">Select Date</h3>
+                    <Input
+                      type="date"
+                      value={createdDate}
+                      onChange={(e) => setCreatedDate(e.target.value)}
+                    />
+                  </div>
 
-                <div className="mt-4">
-                  <h2 className="text-black font-medium my-1">Select Date</h2>
-                  <Input
-                    type="date"
-                    value={createdDate}
-                    onChange={(e) => setCreatedDate(e.target.value)}
-                  />
-                </div>
-
-                {/* Time Period Selection */}
-                <div className="mt-4">
-                  <h2 className="text-black font-medium my-1">Budget Period</h2>
-                  <div className="grid grid-cols-2 gap-3">
-                    {TIME_PERIODS.map((period) => (
-                      <button
-                        key={period.value}
-                        type="button"
-                        onClick={() => setTimePeriod(period.value)}
-                        className={`p-4 border-2 rounded-xl text-left transition-all duration-200 hover:shadow-md ${
-                          timePeriod === period.value
-                            ? "border-blue-500 bg-blue-50 shadow-md"
-                            : "border-gray-200 bg-white hover:border-gray-300"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="text-2xl">{period.icon}</div>
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">
-                              {period.label}
+                  {/* Time Period Selection */}
+                  <div className="mt-4">
+                    <h3 className="text-black font-medium my-1">
+                      Budget Period
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {TIME_PERIODS.map((period) => (
+                        <button
+                          key={period.value}
+                          type="button"
+                          onClick={() => setTimePeriod(period.value)}
+                          className={`p-4 border-2 rounded-xl text-left transition-all duration-200 hover:shadow-md ${
+                            timePeriod === period.value
+                              ? "border-blue-500 bg-blue-50 shadow-md"
+                              : "border-gray-200 bg-white hover:border-gray-300"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="text-2xl">{period.icon}</div>
+                            <div className="flex-1">
+                              <div className="font-medium text-gray-900">
+                                {period.label}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {period.description}
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-500">
-                              {period.description}
-                            </div>
+                            {timePeriod === period.value && (
+                              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                              </div>
+                            )}
                           </div>
-                          {timePeriod === period.value && (
-                            <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Color Picker */}
-                <div className="mt-4">
-                  <h2 className="text-black font-medium my-1">
-                    Select a Color
-                  </h2>
-                  <div className="flex flex-wrap gap-2">
-                    {COLOR_OPTIONS.map((color) => (
-                      <button
-                        key={color.hex}
-                        type="button"
-                        onClick={() => setSelectedColor(color.hex)}
-                        className={`w-8 h-8 rounded-full border-2 transition ${
-                          selectedColor === color.hex
-                            ? "ring-2 ring-offset-2 ring-gray-600"
-                            : "border-transparent"
-                        }`}
-                        style={{ backgroundColor: color.hex }}
-                        aria-label={color.name}
-                      />
-                    ))}
+                  {/* Color Picker */}
+                  <div className="mt-4">
+                    <h3 className="text-black font-medium my-1">
+                      Select a Color
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {COLOR_OPTIONS.map((color) => (
+                        <button
+                          key={color.hex}
+                          type="button"
+                          onClick={() => setSelectedColor(color.hex)}
+                          className={`w-8 h-8 rounded-full border-2 transition ${
+                            selectedColor === color.hex
+                              ? "ring-2 ring-offset-2 ring-gray-600"
+                              : "border-transparent"
+                          }`}
+                          style={{ backgroundColor: color.hex }}
+                          aria-label={color.name}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

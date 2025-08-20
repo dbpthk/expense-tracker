@@ -87,7 +87,6 @@ export const SubscriptionProvider = ({ children }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          priceId: "price_pro_aud_monthly", // AUD 2.99/month price ID
           userId: user.id,
           currency: "aud",
         }),
@@ -218,7 +217,13 @@ export const SubscriptionProvider = ({ children }) => {
   };
 
   const canAddExpense = (currentExpenseCount) => {
+    console.log("canAddExpense called with:", {
+      currentExpenseCount,
+      subscription,
+    });
+
     if (subscription.status === "pro" || subscription.status === "enterprise") {
+      console.log("Pro/Enterprise user, can add expense");
       return true;
     }
 
@@ -227,14 +232,25 @@ export const SubscriptionProvider = ({ children }) => {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthlyCount = subscription.monthlyExpenseCount || 0;
 
+    console.log(
+      "Monthly expense count:",
+      monthlyCount,
+      "Limit:",
+      subscription.expenseLimit
+    );
+
     if (subscription.status === "trial") {
       const trialEnd = new Date(subscription.trialEndsAt);
       if (now < trialEnd) {
-        return monthlyCount < subscription.expenseLimit;
+        const canAdd = monthlyCount < subscription.expenseLimit;
+        console.log("Trial user, can add expense:", canAdd);
+        return canAdd;
       }
     }
 
-    return monthlyCount < subscription.expenseLimit;
+    const canAdd = monthlyCount < subscription.expenseLimit;
+    console.log("Free user, can add expense:", canAdd);
+    return canAdd;
   };
 
   const incrementExpenseCount = () => {

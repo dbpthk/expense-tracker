@@ -4,6 +4,41 @@ import db from "@/lib/db";
 import { Budgets, Expenses } from "@/utils/schema";
 import { eq } from "drizzle-orm";
 
+export async function GET(request, { params }) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = params;
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
+
+    if (!email) {
+      return NextResponse.json({ error: "Email required" }, { status: 400 });
+    }
+
+    const result = await db
+      .select()
+      .from(Budgets)
+      .where(eq(Budgets.id, Number(id)))
+      .where(eq(Budgets.createdBy, email));
+
+    if (result.length === 0) {
+      return NextResponse.json({ error: "Budget not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(result[0]);
+  } catch (error) {
+    console.error("Error fetching budget:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(request, { params }) {
   try {
     const { userId } = await auth();
@@ -26,7 +61,7 @@ export async function PUT(request, { params }) {
       .update(Budgets)
       .set({
         name,
-        amount: Number(amount),
+        amount: parseFloat(amount),
         icon: icon || "💰",
         color,
         createdAt,

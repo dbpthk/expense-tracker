@@ -13,21 +13,40 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Check if Stripe is properly configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error("STRIPE_SECRET_KEY not configured");
+      return NextResponse.json(
+        { error: "Stripe not configured" },
+        { status: 500 }
+      );
+    }
+
     const { priceId } = await request.json();
 
-    if (!priceId) {
+    // Use provided priceId or fallback to environment variable
+    const finalPriceId = priceId || process.env.STRIPE_PRO_PRICE_ID;
+
+    if (!finalPriceId) {
+      console.error(
+        "No price ID provided and STRIPE_PRO_PRICE_ID not configured"
+      );
       return NextResponse.json(
         { error: "Price ID is required" },
         { status: 400 }
       );
     }
 
+    console.log(
+      `Creating checkout session for user ${userId} with price ${finalPriceId}`
+    );
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
-          price: priceId,
+          price: finalPriceId,
           quantity: 1,
         },
       ],
@@ -43,13 +62,27 @@ export async function POST(request) {
           userId: userId,
         },
       },
+      // Add billing address collection for better customer experience
+      billing_address_collection: "auto",
+      // Allow promotion codes
+      allow_promotion_codes: true,
     });
 
+    console.log(`Checkout session created successfully: ${session.id}`);
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error("Error creating checkout session:", error);
+
+    // Provide more specific error messages
+    if (error.type === "StripeInvalidRequestError") {
+      return NextResponse.json(
+        { error: "Invalid Stripe configuration. Please check your price ID." },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Failed to create checkout session. Please try again." },
       { status: 500 }
     );
   }

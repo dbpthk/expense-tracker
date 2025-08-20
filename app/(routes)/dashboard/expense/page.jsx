@@ -63,11 +63,17 @@ const Expense = () => {
   }, [expensesList, currentMonth, searchTerm]);
 
   const totalCurrentMonth = useMemo(() => {
-    return filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    return filteredExpenses.reduce(
+      (sum, exp) => sum + parseFloat(exp.amount || 0),
+      0
+    );
   }, [filteredExpenses]);
 
   const totalTillDate = useMemo(() => {
-    return expensesList.reduce((sum, exp) => sum + exp.amount, 0);
+    return expensesList.reduce(
+      (sum, exp) => sum + parseFloat(exp.amount || 0),
+      0
+    );
   }, [expensesList]);
 
   const groupedByDate = useMemo(() => {
@@ -87,7 +93,7 @@ const Expense = () => {
     filteredExpenses.forEach((expense) => {
       const day = expense.createdAt;
       if (!dayTotals[day]) dayTotals[day] = 0;
-      dayTotals[day] += expense.amount;
+      dayTotals[day] += parseFloat(expense.amount || 0);
     });
     return Object.entries(dayTotals).map(([day, total]) => ({
       date: day,
@@ -99,7 +105,7 @@ const Expense = () => {
     const totals = {};
     filteredExpenses.forEach((expense) => {
       if (!totals[expense.category]) totals[expense.category] = 0;
-      totals[expense.category] += expense.amount;
+      totals[expense.category] += parseFloat(expense.amount || 0);
     });
 
     const totalAmount = Object.values(totals).reduce((a, b) => a + b, 0);
@@ -369,7 +375,7 @@ const Expense = () => {
             {Object.entries(groupedByDate).map(([date, categories]) => {
               const totalForDay = Object.values(categories)
                 .flat()
-                .reduce((sum, e) => sum + e.amount, 0);
+                .reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
               return (
                 <div
                   key={date}
@@ -387,7 +393,7 @@ const Expense = () => {
                   {Object.entries(categories).map(([category, expenses]) => {
                     const budgetId = expenses[0]?.budgetId;
                     const totalForCategory = expenses.reduce(
-                      (sum, e) => sum + e.amount,
+                      (sum, e) => sum + parseFloat(e.amount || 0),
                       0
                     );
                     const categoryColor = getCategoryColor(category);
@@ -427,7 +433,8 @@ const Expense = () => {
                                 className="font-bold"
                                 style={{ color: categoryColor }}
                               >
-                                AUD ${expense.amount.toFixed(2)}
+                                AUD $
+                                {parseFloat(expense.amount || 0).toFixed(2)}
                               </span>
                             </li>
                           ))}

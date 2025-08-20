@@ -92,7 +92,7 @@ const ExpenseListTable = ({ expensesList, refreshData }) => {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <div className="font-bold text-lg text-gray-900">
-                    ${expense.amount?.toFixed(2)}
+                    ${parseFloat(expense.amount || 0).toFixed(2)}
                   </div>
                   <div className="text-xs text-gray-500">
                     {expense.category}
