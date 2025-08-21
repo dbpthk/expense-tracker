@@ -31,26 +31,14 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import * as XLSX from "xlsx";
-
-// Debug XLSX import
-console.log("XLSX library loaded:", typeof XLSX !== "undefined" ? "YES" : "NO");
-console.log("XLSX utils:", typeof XLSX.utils !== "undefined" ? "YES" : "NO");
 
 const Expense = () => {
   const { subscription } = useSubscription();
   const { user } = useUser();
   const [monthOffset, setMonthOffset] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [exporting, setExporting] = useState(false);
+
   const [chartView, setChartView] = useState("daily");
-  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
 
   // Dynamic data from database
   const [expenseData, setExpenseData] = useState({
@@ -232,135 +220,6 @@ const Expense = () => {
     return "❓"; // Default question mark
   };
 
-  // Fresh Export Functions
-  const exportToCSV = (data) => {
-    try {
-      const headers = ["Date", "Category", "Name", "Amount"];
-      const csvContent = [
-        headers.join(","),
-        ...data.map((expense) =>
-          [
-            moment(expense.createdAt, "YYYY-MM-DD").format("DD/MM/YYYY"),
-            expense.category || "Unknown",
-            expense.name,
-            parseFloat(expense.amount || 0).toFixed(2),
-          ].join(",")
-        ),
-      ].join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `expenses-${currentMonth}.csv`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      return true;
-    } catch (error) {
-      console.error("CSV export error:", error);
-      return false;
-    }
-  };
-
-  const exportToExcel = (data) => {
-    try {
-      const cleanData = data.map((expense) => ({
-        Date: moment(expense.createdAt, "YYYY-MM-DD").format("DD/MM/YYYY"),
-        Category: expense.category || "Unknown",
-        Name: expense.name,
-        Amount: parseFloat(expense.amount || 0).toFixed(2),
-      }));
-
-      const worksheet = XLSX.utils.json_to_sheet(cleanData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
-      XLSX.writeFile(workbook, `expenses-${currentMonth}.xlsx`);
-      return true;
-    } catch (error) {
-      console.error("Excel export error:", error);
-      return false;
-    }
-  };
-
-  const exportToJSON = (data) => {
-    try {
-      const jsonData = {
-        month: currentMonth,
-        exportDate: new Date().toISOString(),
-        totalExpenses: data.length,
-        totalAmount: data.reduce(
-          (sum, exp) => sum + parseFloat(exp.amount || 0),
-          0
-        ),
-        expenses: data,
-      };
-
-      const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
-        type: "application/json",
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `expenses-${currentMonth}.json`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-      return true;
-    } catch (error) {
-      console.error("JSON export error:", error);
-      return false;
-    }
-  };
-
-  const handleExport = async (format) => {
-    if (!featureAccess.canExport) {
-      toast.error("Export feature requires Pro subscription");
-      return;
-    }
-
-    if (filteredExpenses.length === 0) {
-      toast.error("No expenses to export for this month");
-      return;
-    }
-
-    // Close dropdown after selection
-    setExportDropdownOpen(false);
-
-    setExporting(true);
-    try {
-      const dataToExport = filteredExpenses.map((expense) => ({
-        ...expense,
-        amount: parseFloat(expense.amount || 0).toFixed(2),
-      }));
-
-      let success = false;
-      switch (format) {
-        case "csv":
-          success = exportToCSV(dataToExport);
-          break;
-        case "xlsx":
-          success = exportToExcel(dataToExport);
-          break;
-        case "json":
-          success = exportToJSON(dataToExport);
-          break;
-        default:
-          toast.error("Unsupported export format");
-          return;
-      }
-
-      if (success) {
-        toast.success(`${format.toUpperCase()} export completed successfully!`);
-      } else {
-        toast.error(`${format.toUpperCase()} export failed. Please try again.`);
-      }
-    } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Export failed. Please try again.");
-    } finally {
-      setExporting(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -392,85 +251,15 @@ const Expense = () => {
             {isLoading ? "Refreshing..." : "Refresh"}
           </Button>
 
-          {/* Export Button */}
-          <DropdownMenu
-            open={exportDropdownOpen}
-            onOpenChange={setExportDropdownOpen}
-            modal={false}
+          {/* Export Button - Redirect to Settings */}
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => (window.location.href = "/dashboard/settings")}
           >
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                disabled={exporting}
-              >
-                <Download className="w-4 h-4" />
-                {exporting ? "Exporting..." : "Export Data"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log("CSV menu item clicked");
-                  handleExport("csv");
-                }}
-                disabled={filteredExpenses.length === 0}
-                className={
-                  filteredExpenses.length === 0
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer"
-                }
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                Export as CSV
-                {filteredExpenses.length === 0 && (
-                  <span className="text-xs text-gray-500 ml-2">(No data)</span>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log("JSON menu item clicked");
-                  handleExport("json");
-                }}
-                disabled={filteredExpenses.length === 0}
-                className={
-                  filteredExpenses.length === 0
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer"
-                }
-              >
-                <FileText className="w-4 h-4" />
-                Export as JSON
-                {filteredExpenses.length === 0 && (
-                  <span className="text-xs text-gray-500 ml-2">(No data)</span>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  console.log("Excel menu item clicked");
-                  handleExport("xlsx");
-                }}
-                disabled={filteredExpenses.length === 0}
-                className={
-                  filteredExpenses.length === 0
-                    ? "opacity-50 cursor-not-allowed"
-                    : "cursor-pointer"
-                }
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-                Export as Excel
-                {filteredExpenses.length === 0 && (
-                  <span className="text-xs text-gray-500 ml-2">(No data)</span>
-                )}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <Download className="w-4 h-4" />
+            Export Data
+          </Button>
         </div>
       </div>
 
@@ -598,7 +387,7 @@ const Expense = () => {
             </div>
 
             {/* Pie Chart */}
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
+            <div className="bg-white p-4 sm:p-6 pb-15 rounded-lg shadow-sm border">
               <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
                 Category Breakdown
               </h3>

@@ -188,7 +188,7 @@ const DashboardClient = () => {
 
       {/* Charts Section */}
       {budgetList && budgetList.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 mt-8 sm:mb-8">
           <BarChartDashboard budgetList={budgetList} />
           <PieChartDashboard
             budgetList={budgetList}
