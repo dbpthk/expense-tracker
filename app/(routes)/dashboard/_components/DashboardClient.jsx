@@ -41,7 +41,7 @@ const DashboardClient = () => {
     [expensesList]
   );
 
-  // Optimized loading effect
+  // Optimized loading effect - only run once when user loads
   useEffect(() => {
     if (!user || !isLoaded) return;
 
@@ -58,7 +58,7 @@ const DashboardClient = () => {
     };
 
     loadData();
-  }, [user, isLoaded]); // Remove getBudgetList dependency to prevent infinite loop
+  }, [user, isLoaded]); // Removed getBudgetList to prevent infinite refresh loop
 
   const handleAIDataParsed = useCallback((data, type) => {
     setAiParsedData(data);
@@ -73,11 +73,8 @@ const DashboardClient = () => {
     setShowExpenseForm(false);
     setShowBudgetForm(false);
     setAiParsedData(null);
-    // Refresh data after form closes
-    setTimeout(() => {
-      if (getBudgetList) getBudgetList();
-    }, 100);
-  }, [getBudgetList]);
+    // Only refresh if data actually changed (forms will handle their own refresh)
+  }, []);
 
   // Show loading skeleton while data is being fetched
   if (isLoading || contextLoading || !user || !isLoaded) {
@@ -89,10 +86,10 @@ const DashboardClient = () => {
   }
 
   return (
-    <div className="pt-15 p-4 md:p-8 pb-20">
+    <div className="pt-15 p-4 sm:p-6 md:p-8 pb-20 max-w-7xl mx-auto">
       {/* AI Quick Actions Section */}
       {budgetList && budgetList.length > 0 && (
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-4 md:p-6 mb-8">
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
             <h3 className="text-lg md:text-xl font-bold text-gray-800">
@@ -104,9 +101,9 @@ const DashboardClient = () => {
             describe what you want to track!
           </p>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-3">
-              <h4 className="font-semibold text-gray-800 flex items-center gap-2 text-sm md:text-base">
+              <h4 className="font-semibold text-gray-800 flex items-center gap-2 text-sm sm:text-base">
                 <Plus className="w-4 h-4 text-green-600" />
                 Quick Expense
               </h4>
@@ -117,7 +114,7 @@ const DashboardClient = () => {
             </div>
 
             <div className="space-y-3">
-              <h4 className="font-semibold text-gray-800 flex items-center gap-2 text-sm md:text-base">
+              <h4 className="font-semibold text-gray-800 flex items-center gap-2 text-sm sm:text-base">
                 <TrendingUp className="w-4 h-4 text-blue-600" />
                 Quick Budget
               </h4>
@@ -132,9 +129,11 @@ const DashboardClient = () => {
 
       {/* Latest Expenses Section */}
       {expensesList && expensesList.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800">Latest Expenses</h2>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+              Latest Expenses
+            </h2>
             <a
               href="/dashboard/expenses"
               className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1 cursor-pointer"
@@ -189,7 +188,7 @@ const DashboardClient = () => {
 
       {/* Charts Section */}
       {budgetList && budgetList.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
           <BarChartDashboard budgetList={budgetList} />
           <PieChartDashboard
             budgetList={budgetList}
@@ -199,9 +198,11 @@ const DashboardClient = () => {
       )}
 
       {/* Latest Budgets Section */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-bold text-xl text-gray-800">Latest Budgets</h2>
+          <h2 className="font-bold text-lg sm:text-xl text-gray-800">
+            Latest Budgets
+          </h2>
           <a
             href="/dashboard/budgets"
             className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1 cursor-pointer"

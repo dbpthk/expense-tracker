@@ -39,15 +39,15 @@ export const BudgetProvider = ({ children }) => {
     setReferesh((prev) => prev + 1);
   }, []);
 
-  // Optimized data fetching with caching
+  // Optimized data fetching with better caching
   const getBudgetList = useCallback(
     async (forceRefresh = false) => {
       if (!userEmail) return;
 
       // Check if we should fetch (avoid unnecessary calls)
       const now = Date.now();
-      if (!forceRefresh && now - lastFetch < 3000) {
-        // Reduced cache time to 3 seconds for better responsiveness
+      if (!forceRefresh && now - lastFetch < 10000) {
+        // Increased cache time to 10 seconds for better performance
         return;
       }
 
@@ -62,7 +62,7 @@ export const BudgetProvider = ({ children }) => {
           // Calculate totals based on fetched budgets
           calculateCardInfo(result);
 
-          // Fetch expenses only if budgets changed or forced
+          // Only fetch expenses if budgets changed or forced
           if (forceRefresh || result.length !== budgetList.length) {
             getAllExpenses(result);
           }
@@ -93,7 +93,7 @@ export const BudgetProvider = ({ children }) => {
           // Reduced timeout for better responsiveness
           setTimeout(() => {
             triggerNotificationCheck(budgetsToCheck, result);
-          }, 200); // Reduced from 300ms to 200ms
+          }, 100); // Reduced from 200ms to 100ms
         }
       } catch (error) {
         console.error("Error fetching expenses:", error);
@@ -123,7 +123,7 @@ export const BudgetProvider = ({ children }) => {
   // Optimized effect to fetch data only when necessary
   useEffect(() => {
     if (user && isLoaded && userEmail) {
-      getBudgetList(true); // Force refresh on initial load
+      getBudgetList(true); // Force refresh on initial load only
     }
   }, [user, isLoaded, userEmail]); // Removed refresh dependency to prevent infinite loops
 

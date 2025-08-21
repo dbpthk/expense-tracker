@@ -247,6 +247,18 @@ const UpgradePage = () => {
         </div>
       </div>
 
+      {/* Beta Testing Notice */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-4 text-center">
+        <div className="flex items-center justify-center gap-3">
+          <span className="text-xl">🚀</span>
+          <p className="text-base font-medium">
+            The app is in beta testing so the pro features are available for
+            free users as well!
+          </p>
+          <span className="text-xl">🎉</span>
+        </div>
+      </div>
+
       {/* Features Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center mb-16">

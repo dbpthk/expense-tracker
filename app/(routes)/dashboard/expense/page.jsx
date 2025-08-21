@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import { useBudget } from "@/context/BugetContext";
+import React, { useMemo, useState, useEffect } from "react";
 import { useSubscription } from "@/context/SubscriptionContext";
 import { useUser } from "@clerk/nextjs";
 import moment from "moment";
@@ -16,6 +15,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  Legend,
 } from "recharts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,9 @@ import {
   Download,
   FileText,
   FileSpreadsheet,
+  Calendar,
+  BarChart3,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -36,31 +39,100 @@ import {
 } from "@/components/ui/dropdown-menu";
 import * as XLSX from "xlsx";
 
+// Debug XLSX import
+console.log("XLSX library loaded:", typeof XLSX !== "undefined" ? "YES" : "NO");
+console.log("XLSX utils:", typeof XLSX.utils !== "undefined" ? "YES" : "NO");
+
 const Expense = () => {
-  const { expensesList, budgetList } = useBudget();
   const { subscription } = useSubscription();
   const { user } = useUser();
   const [monthOffset, setMonthOffset] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [exporting, setExporting] = useState(false);
+  const [chartView, setChartView] = useState("daily");
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
 
-  // Simulate feature access check
+  // Dynamic data from database
+  const [expenseData, setExpenseData] = useState({
+    budgets: [],
+    expenses: [],
+    categories: {},
+    totals: {
+      totalBudget: "0",
+      totalSpent: "0",
+      totalBudgets: 0,
+      totalExpenses: 0,
+    },
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastFetch, setLastFetch] = useState(0);
+
+  // Feature access check - allow exports for all users during beta
   const featureAccess = {
-    canExport:
-      subscription?.status === "pro" || subscription?.canCreateUnlimited,
+    canExport: true, // Allow exports for all users during beta testing
   };
 
   const currentMonth = moment().add(monthOffset, "months").format("MMMM YYYY");
+  const currentMonthYear = moment()
+    .add(monthOffset, "months")
+    .format("YYYY-MM");
+
+  // Fetch data from database
+  const fetchExpenseData = async (forceRefresh = false) => {
+    if (!user?.primaryEmailAddress?.emailAddress) return;
+
+    const now = Date.now();
+    if (!forceRefresh && now - lastFetch < 5000) return; // 5 second cache
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `/api/expense-data?email=${user.primaryEmailAddress.emailAddress}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setExpenseData(data);
+        setLastFetch(now);
+      } else {
+        toast.error("Failed to fetch expense data");
+      }
+    } catch (error) {
+      console.error("Error fetching expense data:", error);
+      toast.error("Failed to fetch expense data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch data on mount and when user changes
+  useEffect(() => {
+    if (user?.primaryEmailAddress?.emailAddress) {
+      fetchExpenseData(true);
+    }
+  }, [user?.primaryEmailAddress?.emailAddress]);
+
+  // Refresh data when month changes
+  useEffect(() => {
+    if (user && expenseData.expenses.length > 0) {
+      fetchExpenseData(true);
+    }
+  }, [monthOffset]);
 
   const filteredExpenses = useMemo(() => {
-    return expensesList.filter((expense) => {
-      return (
-        moment(expense.createdAt, "DD/MM/YYYY").format("MMMM YYYY") ===
-          currentMonth &&
-        expense.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    return expenseData.expenses.filter((expense) => {
+      // Parse the actual API date format (YYYY-MM-DD)
+      const expenseDate = moment(expense.createdAt, "YYYY-MM-DD");
+      const isCurrentMonth = expenseDate.format("YYYY-MM") === currentMonthYear;
+
+      const matchesSearch =
+        expense.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (expense.category &&
+          expense.category.toLowerCase().includes(searchTerm.toLowerCase()));
+
+      return isCurrentMonth && matchesSearch;
     });
-  }, [expensesList, currentMonth, searchTerm]);
+  }, [expenseData.expenses, currentMonthYear, searchTerm]);
 
   const totalCurrentMonth = useMemo(() => {
     return filteredExpenses.reduce(
@@ -70,36 +142,68 @@ const Expense = () => {
   }, [filteredExpenses]);
 
   const totalTillDate = useMemo(() => {
-    return expensesList.reduce(
+    return expenseData.expenses.reduce(
       (sum, exp) => sum + parseFloat(exp.amount || 0),
       0
     );
-  }, [expensesList]);
+  }, [expenseData.expenses]);
 
   const groupedByDate = useMemo(() => {
     const grouped = {};
     filteredExpenses.forEach((expense) => {
-      const date = expense.createdAt;
-      if (!grouped[date]) grouped[date] = {};
-      if (!grouped[date][expense.category])
-        grouped[date][expense.category] = [];
-      grouped[date][expense.category].push(expense);
+      // Convert YYYY-MM-DD to DD/MM/YYYY for display
+      const displayDate = moment(expense.createdAt, "YYYY-MM-DD").format(
+        "DD/MM/YYYY"
+      );
+
+      if (!grouped[displayDate]) grouped[displayDate] = {};
+      if (!grouped[displayDate][expense.category])
+        grouped[displayDate][expense.category] = [];
+      grouped[displayDate][expense.category].push(expense);
     });
     return grouped;
   }, [filteredExpenses]);
 
   const chartData = useMemo(() => {
-    const dayTotals = {};
-    filteredExpenses.forEach((expense) => {
-      const day = expense.createdAt;
-      if (!dayTotals[day]) dayTotals[day] = 0;
-      dayTotals[day] += parseFloat(expense.amount || 0);
-    });
-    return Object.entries(dayTotals).map(([day, total]) => ({
-      date: day,
-      amount: total,
-    }));
-  }, [filteredExpenses]);
+    if (chartView === "daily") {
+      // Daily spending view
+      const dayTotals = {};
+      filteredExpenses.forEach((expense) => {
+        const displayDate = moment(expense.createdAt, "YYYY-MM-DD").format(
+          "DD/MM/YYYY"
+        );
+
+        if (!dayTotals[displayDate]) dayTotals[displayDate] = 0;
+        dayTotals[displayDate] += parseFloat(expense.amount || 0);
+      });
+      return Object.entries(dayTotals).map(([day, total]) => ({
+        date: day,
+        amount: total,
+      }));
+    } else {
+      // Monthly spending view (last 6 months)
+      const monthTotals = {};
+      for (let i = 5; i >= 0; i--) {
+        const month = moment().subtract(i, "months");
+        const monthKey = month.format("MMM YYYY");
+        monthTotals[monthKey] = 0;
+      }
+
+      // Calculate totals for each month
+      expenseData.expenses.forEach((expense) => {
+        const expenseDate = moment(expense.createdAt, "YYYY-MM-DD");
+        const monthKey = expenseDate.format("MMM YYYY");
+        if (monthTotals.hasOwnProperty(monthKey)) {
+          monthTotals[monthKey] += parseFloat(expense.amount || 0);
+        }
+      });
+
+      return Object.entries(monthTotals).map(([month, total]) => ({
+        date: month,
+        amount: total,
+      }));
+    }
+  }, [filteredExpenses, expenseData.expenses, chartView]);
 
   const pieData = useMemo(() => {
     const totals = {};
@@ -107,95 +211,166 @@ const Expense = () => {
       if (!totals[expense.category]) totals[expense.category] = 0;
       totals[expense.category] += parseFloat(expense.amount || 0);
     });
-
-    const totalAmount = Object.values(totals).reduce((a, b) => a + b, 0);
-
-    const mainCategories = [];
-    let otherTotal = 0;
-
-    Object.entries(totals).forEach(([category, amount]) => {
-      const percent = amount / totalAmount;
-      if (percent < 0.05) {
-        otherTotal += amount;
-      } else {
-        mainCategories.push({ name: category, value: amount });
-      }
-    });
-
-    if (otherTotal > 0) {
-      mainCategories.push({ name: "Other Expenses", value: otherTotal });
-    }
-
-    return mainCategories;
+    return Object.entries(totals).map(([name, value]) => ({
+      name,
+      value,
+    }));
   }, [filteredExpenses]);
 
+  // Dynamic category functions - NO HARDCODING
   const getCategoryColor = (category) => {
-    if (category === "Other Expenses") return "#999999"; // Gray for Others
-    const match = budgetList.find((b) => b.name === category);
-    return match?.color || "#8884d8";
+    if (expenseData.categories[category]) {
+      return expenseData.categories[category].color;
+    }
+    return "#6B7280"; // Default gray
   };
 
   const getCategoryIcon = (category) => {
-    const match = budgetList.find((b) => b.name === category);
-    return match?.icon || "💼";
+    if (expenseData.categories[category]) {
+      return expenseData.categories[category].icon;
+    }
+    return "❓"; // Default question mark
+  };
+
+  // Fresh Export Functions
+  const exportToCSV = (data) => {
+    try {
+      const headers = ["Date", "Category", "Name", "Amount"];
+      const csvContent = [
+        headers.join(","),
+        ...data.map((expense) =>
+          [
+            moment(expense.createdAt, "YYYY-MM-DD").format("DD/MM/YYYY"),
+            expense.category || "Unknown",
+            expense.name,
+            parseFloat(expense.amount || 0).toFixed(2),
+          ].join(",")
+        ),
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `expenses-${currentMonth}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      console.error("CSV export error:", error);
+      return false;
+    }
+  };
+
+  const exportToExcel = (data) => {
+    try {
+      const cleanData = data.map((expense) => ({
+        Date: moment(expense.createdAt, "YYYY-MM-DD").format("DD/MM/YYYY"),
+        Category: expense.category || "Unknown",
+        Name: expense.name,
+        Amount: parseFloat(expense.amount || 0).toFixed(2),
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(cleanData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
+      XLSX.writeFile(workbook, `expenses-${currentMonth}.xlsx`);
+      return true;
+    } catch (error) {
+      console.error("Excel export error:", error);
+      return false;
+    }
+  };
+
+  const exportToJSON = (data) => {
+    try {
+      const jsonData = {
+        month: currentMonth,
+        exportDate: new Date().toISOString(),
+        totalExpenses: data.length,
+        totalAmount: data.reduce(
+          (sum, exp) => sum + parseFloat(exp.amount || 0),
+          0
+        ),
+        expenses: data,
+      };
+
+      const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+        type: "application/json",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `expenses-${currentMonth}.json`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      return true;
+    } catch (error) {
+      console.error("JSON export error:", error);
+      return false;
+    }
   };
 
   const handleExport = async (format) => {
     if (!featureAccess.canExport) {
-      toast.error("Export feature is available for Pro users only", {
-        description: "Upgrade to Pro to export your expense data.",
-        action: {
-          label: "Upgrade",
-          onClick: () => (window.location.href = "/dashboard/upgrade"),
-        },
-      });
+      toast.error("Export feature requires Pro subscription");
       return;
     }
 
-    try {
-      setExporting(true);
+    if (filteredExpenses.length === 0) {
+      toast.error("No expenses to export for this month");
+      return;
+    }
 
-      if (format === "xlsx") {
-        const worksheet = XLSX.utils.json_to_sheet(expensesList);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
-        XLSX.writeFile(
-          workbook,
-          `expenses-${new Date().toISOString().split("T")[0]}.xlsx`
-        );
-        toast.success("Expenses exported as Excel successfully!");
-        return;
+    // Close dropdown after selection
+    setExportDropdownOpen(false);
+
+    setExporting(true);
+    try {
+      const dataToExport = filteredExpenses.map((expense) => ({
+        ...expense,
+        amount: parseFloat(expense.amount || 0).toFixed(2),
+      }));
+
+      let success = false;
+      switch (format) {
+        case "csv":
+          success = exportToCSV(dataToExport);
+          break;
+        case "xlsx":
+          success = exportToExcel(dataToExport);
+          break;
+        case "json":
+          success = exportToJSON(dataToExport);
+          break;
+        default:
+          toast.error("Unsupported export format");
+          return;
       }
 
-      if (format === "csv" || format === "json") {
-        const dataStr =
-          format === "csv"
-            ? XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(expensesList))
-            : JSON.stringify(expensesList, null, 2);
-
-        const blob = new Blob([dataStr], { type: "text/plain;charset=utf-8" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `expenses-${
-          new Date().toISOString().split("T")[0]
-        }.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-
-        toast.success(`Expenses exported as ${format.toUpperCase()}`);
+      if (success) {
+        toast.success(`${format.toUpperCase()} export completed successfully!`);
+      } else {
+        toast.error(`${format.toUpperCase()} export failed. Please try again.`);
       }
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("Failed to export expenses", {
-        description: "Please try again or contact support.",
-      });
+      toast.error("Export failed. Please try again.");
     } finally {
       setExporting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-gray-600">Loading expense data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-5xl mx-auto p-4 sm:p-6">
@@ -205,41 +380,98 @@ const Expense = () => {
           Expenses Overview – {currentMonth}
         </h2>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="flex items-center gap-2"
-              disabled={exporting || expensesList.length === 0}
-            >
-              <Download className="w-4 h-4" />
-              {exporting ? "Exporting..." : "Export Data"}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleExport("csv")}>
-              <FileSpreadsheet className="w-4 h-4" />
-              Export as CSV
-              {!featureAccess.canExport && (
-                <span className="text-xs text-orange-600 ml-2">Pro</span>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport("json")}>
-              <FileText className="w-4 h-4" />
-              Export as JSON
-              {!featureAccess.canExport && (
-                <span className="text-xs text-orange-600 ml-2">Pro</span>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport("xlsx")}>
-              <FileSpreadsheet className="w-4 h-4" />
-              Export as Excel
-              {!featureAccess.canExport && (
-                <span className="text-xs text-orange-600 ml-2">Pro</span>
-              )}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-3">
+          {/* Refresh Button */}
+          <Button
+            variant="outline"
+            onClick={() => fetchExpenseData(true)}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <Loader2 className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+            {isLoading ? "Refreshing..." : "Refresh"}
+          </Button>
+
+          {/* Export Button */}
+          <DropdownMenu
+            open={exportDropdownOpen}
+            onOpenChange={setExportDropdownOpen}
+            modal={false}
+          >
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                disabled={exporting}
+              >
+                <Download className="w-4 h-4" />
+                {exporting ? "Exporting..." : "Export Data"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("CSV menu item clicked");
+                  handleExport("csv");
+                }}
+                disabled={filteredExpenses.length === 0}
+                className={
+                  filteredExpenses.length === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Export as CSV
+                {filteredExpenses.length === 0 && (
+                  <span className="text-xs text-gray-500 ml-2">(No data)</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("JSON menu item clicked");
+                  handleExport("json");
+                }}
+                disabled={filteredExpenses.length === 0}
+                className={
+                  filteredExpenses.length === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }
+              >
+                <FileText className="w-4 h-4" />
+                Export as JSON
+                {filteredExpenses.length === 0 && (
+                  <span className="text-xs text-gray-500 ml-2">(No data)</span>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log("Excel menu item clicked");
+                  handleExport("xlsx");
+                }}
+                disabled={filteredExpenses.length === 0}
+                className={
+                  filteredExpenses.length === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "cursor-pointer"
+                }
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Export as Excel
+                {filteredExpenses.length === 0 && (
+                  <span className="text-xs text-gray-500 ml-2">(No data)</span>
+                )}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Monthly / All-Time totals */}
@@ -278,7 +510,7 @@ const Expense = () => {
         </div>
         <Input
           type="text"
-          placeholder="Search expense name..."
+          placeholder="Search expense name or category..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
@@ -291,83 +523,155 @@ const Expense = () => {
           <p className="text-lg">
             No expenses found for the selected month or search term.
           </p>
-          {expensesList.length > 0 && (
+          {expenseData.expenses.length > 0 && (
             <p className="text-sm mt-2 text-gray-500">
               Try adjusting the month or search term to see your expenses.
+            </p>
+          )}
+          {expenseData.expenses.length === 0 && (
+            <p className="text-sm mt-2 text-gray-500">
+              No expenses found in the system. Try refreshing the data.
             </p>
           )}
         </div>
       ) : (
         <>
-          {/* Daily Bar Chart */}
-          <div className="w-full h-64 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
-            <h3 className="text-lg font-semibold mb-2 text-gray-800">
-              Daily Spending
-            </h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData}
-                margin={{ top: 20, right: 20, left: 0, bottom: 60 }}
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Bar Chart with Toggle */}
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <h3 className="text-lg font-semibold">Spending Overview</h3>
+
+                {/* Chart Toggle */}
+                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                  <Button
+                    variant={chartView === "daily" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setChartView("daily")}
+                    className="flex items-center gap-2 text-xs px-3 py-1 h-8"
+                  >
+                    <Calendar className="w-3 h-3" />
+                    Daily
+                  </Button>
+                  <Button
+                    variant={chartView === "monthly" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setChartView("monthly")}
+                    className="flex items-center gap-2 text-xs px-3 py-1 h-8"
+                  >
+                    <BarChart3 className="w-3 h-3" />
+                    Monthly
+                  </Button>
+                </div>
+              </div>
+
+              <ResponsiveContainer
+                width="100%"
+                height={250}
+                className="min-h-[250px]"
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 11, fill: "#4b5563" }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: "#4b5563" }}
-                  tickFormatter={(value) => `$${value}`}
-                />
-                <Tooltip
-                  formatter={(value) => [`AUD $${value}`, "Total"]}
-                  contentStyle={{ fontSize: "0.875rem" }}
-                />
-                <Bar
-                  dataKey="amount"
-                  fill="#60a5fa"
-                  radius={[6, 6, 0, 0]}
-                  barSize={22}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    angle={chartView === "monthly" ? -45 : 0}
+                    textAnchor={chartView === "monthly" ? "end" : "middle"}
+                    height={chartView === "monthly" ? 80 : 60}
+                    fontSize={12}
+                  />
+                  <YAxis fontSize={12} />
+                  <Tooltip
+                    formatter={(value) => [`AUD $${value}`, "Amount"]}
+                    labelStyle={{ fontSize: "12px" }}
+                  />
+                  <Bar dataKey="amount" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
 
-          {/* Category Pie Chart */}
-          <div className="text-sm text-center text-gray-600 mb-2 italic">
-            Categories below 5% are grouped as <strong>Other Expenses</strong>.
-          </div>
+              {/* Chart Info */}
+              <div className="text-xs text-gray-500 mt-2 text-center">
+                {chartView === "daily"
+                  ? `Showing daily spending for ${currentMonth}`
+                  : "Showing monthly spending for last 6 months"}
+              </div>
+            </div>
 
-          <div className="w-full h-64 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
-            <h3 className="text-lg font-semibold mb-2 text-gray-800">
-              Category Breakdown
-            </h3>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
-                  }
-                  labelLine={false}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={getCategoryColor(entry.name)}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`AUD $${value}`, "Category"]} />
-              </PieChart>
-            </ResponsiveContainer>
+            {/* Pie Chart */}
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+                Category Breakdown
+              </h3>
+              <ResponsiveContainer
+                width="100%"
+                height={240}
+                className="min-h-[240px]"
+              >
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={55}
+                    dataKey="value"
+                    label={({ name, percent }) => {
+                      // Show labels for more segments with better visibility
+                      if (percent > 0.08) {
+                        // Lower threshold to show more labels
+                        return `${(percent * 100).toFixed(0)}%`;
+                      }
+                      return null;
+                    }}
+                    labelLine={false}
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={getCategoryColor(entry.name)}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value, name) => [
+                      `AUD $${value.toFixed(2)}`,
+                      name,
+                    ]}
+                    labelStyle={{ fontSize: "12px" }}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={50}
+                    content={({ payload }) => (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        {/* Legend Title */}
+                        <div className="text-center mb-2">
+                          <h4 className="text-sm font-semibold text-gray-700">
+                            Expense Categories
+                          </h4>
+                        </div>
+                        {/* Legend Items */}
+                        <div className="flex flex-wrap justify-center gap-2">
+                          {payload?.map((entry, index) => (
+                            <div
+                              key={`legend-${index}`}
+                              className="flex items-center gap-1"
+                            >
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: entry.color }}
+                              />
+                              <span className="text-xs text-gray-600 font-medium max-w-[80px] truncate">
+                                {entry.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
           {/* Grouped Expenses */}
@@ -404,7 +708,7 @@ const Expense = () => {
                         href={
                           budgetId ? `/dashboard/expenses/${budgetId}` : "#"
                         }
-                        className="block cursor-pointer hover:bg-gray-50 border-b border-gray-200 last:border-none px-6 py-4 transition-colors"
+                        className="block cursor-pointer hover:bg-gray-50 border-b border-gray-200 last:border-none px-4 sm:px-6 py-4 transition-colors"
                       >
                         <h3
                           className="flex items-center gap-3 font-semibold text-base mb-2"
@@ -414,7 +718,7 @@ const Expense = () => {
                             {getCategoryIcon(category)}
                           </span>
                           <span>
-                            {category} –{" "}
+                            {category || "Unknown Category"} –{" "}
                             <span className="font-bold">
                               AUD ${totalForCategory.toFixed(2)}
                             </span>
