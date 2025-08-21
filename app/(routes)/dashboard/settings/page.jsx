@@ -31,7 +31,7 @@ const ToggleSwitch = React.memo(
         } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
         <span
-          className={`inline-block h-4 h-4 transform rounded-full bg-white transition-transform ${
+          className={`inline-block h-4 transform rounded-full bg-white transition-transform ${
             enabled ? "translate-x-6" : "translate-x-1"
           }`}
         />
