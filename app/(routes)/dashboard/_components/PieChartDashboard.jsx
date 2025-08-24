@@ -122,7 +122,7 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
         </p>
       </div>
 
-      <div className="w-full h-[220px] sm:h-[270px] md:h-[320px]">
+      <div className="w-full h-[450px] sm:[270px] md:h-[370px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie

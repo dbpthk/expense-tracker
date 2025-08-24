@@ -190,7 +190,7 @@ const DashboardHeader = () => {
         )}
       </div>
 
-      <div className="hidden md:flex">
+      <div className="hidden lg:flex">
         <UserButton className="cursor-pointer" />
       </div>
     </div>
