@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import db from "@/lib/db";
 import { Expenses, Budgets } from "@/utils/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray, and } from "drizzle-orm";
 
 export async function GET(request) {
   try {
@@ -11,25 +11,40 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
-
-    if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+    // SECURITY FIX: Get user email directly from Clerk authentication
+    const user = await currentUser();
+    if (!user?.primaryEmailAddress?.emailAddress) {
+      return NextResponse.json(
+        { error: "User email not found" },
+        { status: 400 }
+      );
     }
 
-    // Get all budgets
+    const userEmail = user.primaryEmailAddress.emailAddress;
+
+    // Get all budgets for the authenticated user
     const budgets = await db
       .select()
       .from(Budgets)
-      .where(eq(Budgets.createdBy, email))
+      .where(eq(Budgets.createdBy, userEmail))
       .orderBy(desc(Budgets.id));
 
-    // Get all expenses (they don't have createdBy field in schema)
-    const expenses = await db
-      .select()
-      .from(Expenses)
-      .orderBy(desc(Expenses.id));
+    // SECURITY FIX: Only get expenses that belong to user's budgets
+    const userBudgetIds = budgets.map((b) => b.id);
+
+    let expenses = [];
+    if (userBudgetIds.length > 0) {
+      expenses = await db
+        .select()
+        .from(Expenses)
+        .where(
+          and(
+            inArray(Expenses.budgetId, userBudgetIds),
+            eq(Expenses.createdBy, userEmail) // SECURITY: Only user's own expenses
+          )
+        )
+        .orderBy(desc(Expenses.id));
+    }
 
     // Create category mapping from budgets
     const categoryMap = {};

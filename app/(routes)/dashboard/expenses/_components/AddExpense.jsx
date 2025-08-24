@@ -56,9 +56,7 @@ const AddExpense = ({ refreshData, refreshExpenses, prefillData }) => {
     const fetchBudgets = async () => {
       if (!user?.primaryEmailAddress?.emailAddress) return;
       try {
-        const response = await fetch(
-          `/api/budgets?email=${user.primaryEmailAddress.emailAddress}`
-        );
+        const response = await fetch(`/api/budgets`);
         if (response.ok) {
           const result = await response.json();
           setBudgets(result);
@@ -100,16 +98,13 @@ const AddExpense = ({ refreshData, refreshExpenses, prefillData }) => {
         color: selectedBudget.color,
       };
 
-      const response = await fetch(
-        `/api/expenses?email=${user.primaryEmailAddress.emailAddress}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const response = await fetch(`/api/expenses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
 
       if (response.ok) {
         const result = await response.json();

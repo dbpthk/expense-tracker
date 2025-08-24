@@ -57,9 +57,7 @@ const ManageExpenses = () => {
 
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/expenses?email=${user?.primaryEmailAddress?.emailAddress}`
-      );
+      const response = await fetch(`/api/expenses`);
       if (response.ok) {
         const allExpenses = await response.json();
         const budgetExpenses = allExpenses.filter(

@@ -53,7 +53,7 @@ export const BudgetProvider = ({ children }) => {
 
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/budgets?email=${userEmail}`);
+        const response = await fetch(`/api/budgets`);
         if (response.ok) {
           const result = await response.json();
           setBudgetList(result);

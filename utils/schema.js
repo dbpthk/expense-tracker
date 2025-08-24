@@ -22,7 +22,7 @@ export const Expenses = pgTable("expenses", {
   createdAt: varchar("createdAt").notNull(),
   category: varchar("category").notNull(),
   color: varchar("color").notNull(),
-  createdBy: varchar("createdBy"), // Temporarily optional for migration
+  createdBy: varchar("createdBy").notNull(), // SECURITY: Required for user isolation
 });
 
 export const Categories = pgTable("categories", {

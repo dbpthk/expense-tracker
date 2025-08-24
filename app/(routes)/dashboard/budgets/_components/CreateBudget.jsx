@@ -137,7 +137,6 @@ const CreateBudget = ({ refreshData, prefillData }) => {
         body: JSON.stringify({
           name: budgetName,
           amount: parseFloat(budgetAmount),
-          createdBy: user.primaryEmailAddress.emailAddress,
           icon: emoji,
           color: selectedColor,
           createdAt: formattedDate,
@@ -147,16 +146,16 @@ const CreateBudget = ({ refreshData, prefillData }) => {
 
       if (response.ok) {
         refreshData();
-        toast("New Budget Created!");
+        toast.success("Budget created successfully!");
         setBudgetName("");
         setBudgetAmount("");
         setEmoji("😀");
         setSelectedColor(COLOR_OPTIONS[0].hex);
         setTimePeriod("monthly");
-        setOpenEmojiPicker(false);
         setCreatedDate(moment().format("YYYY-MM-DD"));
       } else {
-        throw new Error("Failed to create budget");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create budget");
       }
     } catch (error) {
       console.error("Error creating budget:", error);

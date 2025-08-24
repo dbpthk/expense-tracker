@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import db from "@/lib/db";
 import { Expenses, Budgets } from "@/utils/schema";
 import { eq, desc, inArray } from "drizzle-orm";
@@ -11,22 +11,22 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user email from query params
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
-
-    if (!email) {
+    // SECURITY FIX: Get user email directly from Clerk authentication
+    const user = await currentUser();
+    if (!user?.primaryEmailAddress?.emailAddress) {
       return NextResponse.json(
-        { error: "Email parameter required" },
+        { error: "User email not found" },
         { status: 400 }
       );
     }
+
+    const userEmail = user.primaryEmailAddress.emailAddress;
 
     // Get user's budgets first
     const userBudgets = await db
       .select()
       .from(Budgets)
-      .where(eq(Budgets.createdBy, email));
+      .where(eq(Budgets.createdBy, userEmail));
 
     const budgetIds = userBudgets.map((b) => b.id);
 
@@ -72,16 +72,16 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get user email from Clerk
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
-
-    if (!email) {
+    // SECURITY FIX: Get user email directly from Clerk authentication
+    const user = await currentUser();
+    if (!user?.primaryEmailAddress?.emailAddress) {
       return NextResponse.json(
-        { error: "Email parameter required" },
+        { error: "User email not found" },
         { status: 400 }
       );
     }
+
+    const userEmail = user.primaryEmailAddress.emailAddress;
 
     const body = await request.json();
     const { name, amount, budgetId, color } = body;
@@ -97,7 +97,7 @@ export async function POST(request) {
     const userBudgets = await db
       .select()
       .from(Budgets)
-      .where(eq(Budgets.createdBy, email));
+      .where(eq(Budgets.createdBy, userEmail));
 
     const budgetIds = userBudgets.map((b) => b.id);
     if (!budgetIds.includes(Number(budgetId))) {
@@ -120,7 +120,7 @@ export async function POST(request) {
         category,
         color: color || "#3B82F6",
         createdAt: new Date().toISOString().split("T")[0],
-        createdBy: email, // Add user email for proper isolation
+        createdBy: userEmail, // SECURITY: Always use authenticated user's email
       })
       .returning({ insertedId: Expenses.id });
 

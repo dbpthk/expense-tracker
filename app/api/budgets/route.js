@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import db from "@/lib/db";
 import { Budgets, Expenses } from "@/utils/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, inArray } from "drizzle-orm";
 
 export async function GET(request) {
   try {
@@ -11,27 +11,42 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get("email");
-
-    if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+    // SECURITY FIX: Get user email directly from Clerk authentication
+    const user = await currentUser();
+    if (!user?.primaryEmailAddress?.emailAddress) {
+      return NextResponse.json(
+        { error: "User email not found" },
+        { status: 400 }
+      );
     }
 
-    // Get budgets first
+    const userEmail = user.primaryEmailAddress.emailAddress;
+
+    // SECURITY FIX: Only get budgets owned by the authenticated user
     const budgets = await db
       .select()
       .from(Budgets)
-      .where(eq(Budgets.createdBy, email))
+      .where(eq(Budgets.createdBy, userEmail))
       .orderBy(desc(Budgets.id));
 
-    // Get expenses for calculating totalSpend
-    const expenses = await db
-      .select({
-        budgetId: Expenses.budgetId,
-        amount: Expenses.amount,
-      })
-      .from(Expenses);
+    // SECURITY FIX: Only get expenses for user's budgets
+    const userBudgetIds = budgets.map((b) => b.id);
+
+    let expenses = [];
+    if (userBudgetIds.length > 0) {
+      expenses = await db
+        .select({
+          budgetId: Expenses.budgetId,
+          amount: Expenses.amount,
+        })
+        .from(Expenses)
+        .where(
+          and(
+            inArray(Expenses.budgetId, userBudgetIds),
+            eq(Expenses.createdBy, userEmail) // SECURITY: Only user's own expenses
+          )
+        );
+    }
 
     // Calculate totalSpend for each budget
     const result = budgets.map((budget) => {
@@ -75,17 +90,28 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { name, amount, icon, color, createdBy, createdAt, timePeriod } =
-      body;
+    // SECURITY FIX: Get user email directly from Clerk authentication
+    const user = await currentUser();
+    if (!user?.primaryEmailAddress?.emailAddress) {
+      return NextResponse.json(
+        { error: "User email not found" },
+        { status: 400 }
+      );
+    }
 
-    if (!name || !amount || !color || !createdBy) {
+    const userEmail = user.primaryEmailAddress.emailAddress;
+
+    const body = await request.json();
+    const { name, amount, icon, color, createdAt, timePeriod } = body;
+
+    if (!name || !amount || !color) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
+    // SECURITY FIX: Always use the authenticated user's email, ignore any createdBy from request
     const result = await db
       .insert(Budgets)
       .values({
@@ -93,7 +119,7 @@ export async function POST(request) {
         amount: amount.toString(),
         icon: icon || "💰",
         color,
-        createdBy,
+        createdBy: userEmail, // SECURITY: Always use authenticated user's email
         createdAt,
         timePeriod: timePeriod || "monthly",
       })

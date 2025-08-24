@@ -170,7 +170,7 @@ const DashboardClient = () => {
               Latest Expenses
             </h2>
             <a
-              href="/dashboard/expenses"
+              href="/dashboard/expense"
               className="text-sm text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1 cursor-pointer"
             >
               View All <ArrowRight className="w-4 h-4" />

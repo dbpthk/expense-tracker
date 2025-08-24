@@ -17,9 +17,7 @@ const BudgetList = () => {
 
   const getBudgetList = async () => {
     try {
-      const response = await fetch(
-        `/api/budgets?email=${user?.primaryEmailAddress?.emailAddress}`
-      );
+      const response = await fetch(`/api/budgets`);
       if (response.ok) {
         const result = await response.json();
         setBudgetList(result);
