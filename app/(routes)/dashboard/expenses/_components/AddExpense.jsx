@@ -29,7 +29,7 @@ import { useUser } from "@clerk/nextjs";
 import { useSubscription } from "@/context/SubscriptionContext";
 import AIInput from "@/components/ui/ai-input";
 
-const AddExpense = ({ refreshData, refereshExpenses, prefillData }) => {
+const AddExpense = ({ refreshData, refreshExpenses, prefillData }) => {
   const { user } = useUser();
   const { setReferesh } = useBudget();
   const { subscription, canAddExpense } = useSubscription();
@@ -100,13 +100,16 @@ const AddExpense = ({ refreshData, refereshExpenses, prefillData }) => {
         color: selectedBudget.color,
       };
 
-      const response = await fetch("/api/expenses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(
+        `/api/expenses?email=${user.primaryEmailAddress.emailAddress}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
@@ -115,7 +118,7 @@ const AddExpense = ({ refreshData, refereshExpenses, prefillData }) => {
         setAmount("");
         setSelectedBudget(null);
         refreshData();
-        refereshExpenses();
+        refreshExpenses();
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
@@ -136,7 +139,7 @@ const AddExpense = ({ refreshData, refereshExpenses, prefillData }) => {
     selectedBudget,
     canAddExpense,
     refreshData,
-    refereshExpenses,
+    refreshExpenses,
   ]);
 
   const handleAddClick = useCallback(() => {

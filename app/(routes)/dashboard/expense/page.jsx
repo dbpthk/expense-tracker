@@ -492,11 +492,8 @@ const Expense = () => {
                     const categoryColor = getCategoryColor(category);
 
                     return (
-                      <Link
+                      <div
                         key={category}
-                        href={
-                          budgetId ? `/dashboard/expenses/${budgetId}` : "#"
-                        }
                         className="block cursor-pointer hover:bg-gray-50 border-b border-gray-200 last:border-none px-4 sm:px-6 py-4 transition-colors"
                       >
                         <h3
@@ -532,7 +529,7 @@ const Expense = () => {
                             </li>
                           ))}
                         </ul>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>

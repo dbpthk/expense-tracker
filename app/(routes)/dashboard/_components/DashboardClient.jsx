@@ -88,7 +88,7 @@ const DashboardClient = () => {
   return (
     <div className="pt-15 p-4 sm:p-6 md:p-8 pb-20 max-w-7xl mx-auto">
       {/* AI Quick Actions Section */}
-      {budgetList && budgetList.length > 0 && (
+      {budgetList && budgetList.length > 0 ? (
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-purple-600" />
@@ -122,6 +122,41 @@ const DashboardClient = () => {
                 onDataParsed={(data) => handleAIDataParsed(data, "budget")}
                 type="budget"
               />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-r from-gray-50 to-blue-50 border border-gray-200 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-gray-400" />
+            <h3 className="text-lg md:text-xl font-bold text-gray-600">
+              AI Quick Actions
+            </h3>
+          </div>
+          <p className="text-sm md:text-base text-gray-500 mb-4 md:mb-6">
+            AI-powered expense and budget parsing will be available once you
+            create your first budget.
+          </p>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-6 h-6 text-blue-600" />
+              <div className="flex-1">
+                <h4 className="font-medium text-blue-800">
+                  Create Your First Budget
+                </h4>
+                <p className="text-sm text-blue-700">
+                  Start by creating a budget category to unlock AI-powered
+                  expense tracking and insights!
+                </p>
+              </div>
+              <Button
+                onClick={() => (window.location.href = "/dashboard/budgets")}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Budget
+              </Button>
             </div>
           </div>
         </div>
@@ -223,6 +258,26 @@ const DashboardClient = () => {
                 />
               </div>
             ))
+          ) : budgetList && budgetList.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                No Budgets Available
+              </h3>
+              <p className="text-gray-500 mb-4 max-w-sm mx-auto">
+                You haven't created any budgets yet. Create your first budget to
+                start managing your finances.
+              </p>
+              <Button
+                onClick={() => (window.location.href = "/dashboard/budgets")}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Your First Budget
+              </Button>
+            </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -230,28 +285,6 @@ const DashboardClient = () => {
             </div>
           )}
         </div>
-
-        {budgetList && budgetList.length === 0 && (
-          <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-xl bg-gradient-to-br from-gray-50 to-blue-50">
-            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="w-10 h-10 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">
-              No Budgets Yet
-            </h3>
-            <p className="text-gray-500 mb-4 max-w-sm mx-auto">
-              Create your first budget to start tracking your expenses and
-              managing your finances effectively.
-            </p>
-            <Button
-              onClick={() => (window.location.href = "/dashboard/budgets")}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Your First Budget
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* AI Parsed Data Forms */}
@@ -267,7 +300,7 @@ const DashboardClient = () => {
               </DialogHeader>
               <AddExpense
                 refreshData={handleFormClose}
-                refereshExpenses={handleFormClose}
+                refreshExpenses={handleFormClose}
                 prefillData={aiParsedData}
               />
             </DialogContent>

@@ -1,4 +1,4 @@
-# Expense Tracker - Setup Guide
+# ExpensiGo - Setup Guide
 
 ## 🚀 New Features & Improvements
 

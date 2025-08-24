@@ -182,7 +182,7 @@ const ExpenseItem = ({ params }) => {
                   : 0
               }
               refreshData={getBudgetInfo}
-              refereshExpenses={getExpensesList}
+              refreshExpenses={getExpensesList}
             />
           ) : (
             <div className="w-full h-[160px] bg-[#9aecb729] rounded-lg animate-pulse"></div>

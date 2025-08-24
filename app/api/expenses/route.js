@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import db from "@/lib/db";
 import { Expenses, Budgets } from "@/utils/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export async function GET(request) {
   try {
@@ -11,15 +11,37 @@ export async function GET(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const expenses = await db
-      .select()
-      .from(Expenses)
-      .orderBy(desc(Expenses.id));
+    // Get user email from query params
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
 
-    const budgets = await db.select().from(Budgets);
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email parameter required" },
+        { status: 400 }
+      );
+    }
+
+    // Get user's budgets first
+    const userBudgets = await db
+      .select()
+      .from(Budgets)
+      .where(eq(Budgets.createdBy, email));
+
+    const budgetIds = userBudgets.map((b) => b.id);
+
+    // Only fetch expenses that belong to user's budgets
+    const expenses =
+      budgetIds.length > 0
+        ? await db
+            .select()
+            .from(Expenses)
+            .where(inArray(Expenses.budgetId, budgetIds))
+            .orderBy(desc(Expenses.id))
+        : [];
 
     const budgetMap = {};
-    budgets.forEach((budget) => {
+    userBudgets.forEach((budget) => {
       budgetMap[budget.id] = budget.name;
     });
 
@@ -50,6 +72,17 @@ export async function POST(request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Get user email from Clerk
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
+
+    if (!email) {
+      return NextResponse.json(
+        { error: "Email parameter required" },
+        { status: 400 }
+      );
+    }
+
     const body = await request.json();
     const { name, amount, budgetId, color } = body;
 
@@ -60,9 +93,22 @@ export async function POST(request) {
       );
     }
 
+    // Validate that the budget belongs to the user
+    const userBudgets = await db
+      .select()
+      .from(Budgets)
+      .where(eq(Budgets.createdBy, email));
+
+    const budgetIds = userBudgets.map((b) => b.id);
+    if (!budgetIds.includes(Number(budgetId))) {
+      return NextResponse.json(
+        { error: "Budget not found or access denied" },
+        { status: 403 }
+      );
+    }
+
     // Get budget name for category
-    const budgets = await db.select().from(Budgets);
-    const budget = budgets.find((b) => b.id === budgetId);
+    const budget = userBudgets.find((b) => b.id === Number(budgetId));
     const category = budget ? budget.name : "Unknown";
 
     const result = await db
@@ -70,10 +116,11 @@ export async function POST(request) {
       .values({
         name,
         amount: amount.toString(),
-        budgetId,
+        budgetId: Number(budgetId),
         category,
         color: color || "#3B82F6",
         createdAt: new Date().toISOString().split("T")[0],
+        createdBy: email, // Add user email for proper isolation
       })
       .returning({ insertedId: Expenses.id });
 

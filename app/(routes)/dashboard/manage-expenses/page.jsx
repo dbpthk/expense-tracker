@@ -129,7 +129,43 @@ const ManageExpenses = () => {
   const handleExpenseAdded = () => {
     setShowAddExpense(false);
     getExpensesList();
-    toast.success("Expense added successfully!");
+
+    // Force a complete refresh of budget data with updated totals
+    getBudgetList(true); // Pass true to force refresh
+
+    // Also refresh the selected budget to show updated totals
+    if (selectedBudget) {
+      // Force a re-render by updating the selected budget
+      setSelectedBudget({ ...selectedBudget });
+    }
+
+    // Force a complete re-fetch of budgets to get updated totalSpend
+    setTimeout(() => {
+      const refreshBudgets = async () => {
+        try {
+          const response = await fetch(
+            `/api/budgets?email=${user?.primaryEmailAddress?.emailAddress}`
+          );
+          if (response.ok) {
+            const result = await response.json();
+            // Find and update the selected budget with fresh data
+            if (selectedBudget) {
+              const updatedBudget = result.find(
+                (b) => b.id === selectedBudget.id
+              );
+              if (updatedBudget) {
+                setSelectedBudget(updatedBudget);
+              }
+            }
+            // Force a complete refresh of the context data
+            getBudgetList(true);
+          }
+        } catch (error) {
+          console.error("Error refreshing budgets:", error);
+        }
+      };
+      refreshBudgets();
+    }, 200);
   };
 
   if (!user || !isLoaded) {
@@ -376,8 +412,8 @@ const ManageExpenses = () => {
                 </DialogHeader>
                 <AddExpense
                   refreshData={handleExpenseAdded}
-                  refereshExpenses={handleExpenseAdded}
-                  selectedBudget={selectedBudget}
+                  refreshExpenses={handleExpenseAdded}
+                  prefillData={null}
                 />
               </DialogContent>
             </Dialog>

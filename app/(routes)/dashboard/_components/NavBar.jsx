@@ -98,9 +98,7 @@ const NavBar = () => {
           <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
             <TrendingUp className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-bold text-gray-900">
-            ExpenseTracker
-          </span>
+          <span className="text-xl font-bold text-gray-900">ExpensiGo</span>
         </Link>
 
         {/* Navigation Menu */}
@@ -137,9 +135,7 @@ const NavBar = () => {
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-gray-900">
-              ExpenseTracker
-            </span>
+            <span className="text-lg font-bold text-gray-900">ExpensiGo</span>
           </Link>
 
           <div className="flex items-center gap-3">
@@ -199,7 +195,7 @@ const NavBar = () => {
                       <TrendingUp className="w-6 h-6 text-white" />
                     </div>
                     <span className="text-xl font-bold text-gray-900">
-                      ExpenseTracker
+                      ExpensiGo
                     </span>
                   </Link>
                   <button

@@ -462,7 +462,7 @@ const UpgradePage = () => {
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Need Help?</h2>
           <p className="text-xl text-gray-600 mb-8">
-            Our team is here to help you get the most out of ExpenseTracker
+            Our team is here to help you get the most out of ExpensiGo
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* General Support */}

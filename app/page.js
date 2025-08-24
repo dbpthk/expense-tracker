@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,7 +80,7 @@ export default function LandingPage() {
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900">
-                ExpenseTracker
+                ExpensiGo
               </span>
             </div>
             <div className="flex items-center space-x-4">
@@ -126,17 +127,25 @@ export default function LandingPage() {
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
-              <Button
-                size="lg"
-                variant="outline"
-                className="px-8 py-4 text-lg font-medium border-2"
-              >
-                <Play className="mr-2 w-5 h-5" />
-                Watch Demo
-              </Button>
+              <div>
+                <a
+                  href="https://youtu.be/VacPr60Z0ss"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="px-8 py-4 text-lg font-medium border-2"
+                  >
+                    <Play className="mr-2 w-5 h-5" />
+                    Watch Demo
+                  </Button>
+                </a>
+              </div>
             </div>
             <p className="text-sm text-gray-500 mt-4">
-              No credit card required • 30-day free trial • Cancel anytime
+              No credit card required — try premium features for free.
             </p>
           </div>
         </div>
@@ -170,7 +179,7 @@ export default function LandingPage() {
             <div className="inline-block filter drop-shadow-2xl">
               <Image
                 src="/dashboard.png"
-                alt="ExpenseTracker Dashboard Demo"
+                alt="ExpensiGo Dashboard Demo"
                 width={1200}
                 height={800}
                 className="w-full h-auto rounded-xl"
@@ -192,7 +201,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Why Choose ExpenseTracker?
+              Why Choose ExpensiGo?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Built with cutting-edge technology and designed for real people
@@ -226,7 +235,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Thousands
+              Trusted by Hundreds
             </h2>
             <p className="text-xl text-gray-600">
               Join the community of smart savers and financial planners
@@ -277,7 +286,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Blog Post 1 */}
             <a
-              href="https://www.nerdwallet.com/article/finance/how-to-budget"
+              href="https://fincalc-blog.in/10-essential-budgeting-tips-for-beginners/?utm_source=chatgpt.com"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -313,7 +322,7 @@ export default function LandingPage() {
 
             {/* Blog Post 2 */}
             <a
-              href="https://blog.nerdwallet.com/what-is-budgeting/"
+              href="https://techresearchonline.com/blog/ai-personal-finance/?utm_source=chatgpt.com"
               target="_blank"
               rel="noopener noreferrer"
               className="block"
@@ -350,7 +359,7 @@ export default function LandingPage() {
 
             {/* Blog Post 3 */}
             <a
-              href="https://www.investopedia.com/expense-management-5213593"
+              href="https://suozziforny.com/protect-financial-data/?utm_source=chatgpt.com"
               target="_blank"
               rel="noopener noreferrer"
               className="block"
@@ -417,13 +426,6 @@ export default function LandingPage() {
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white text-blue-600 hover:bg-gray-100 hover:text-blue-700 cursor-pointer px-8 py-4 text-lg font-medium"
-            >
-              Learn More
-            </Button>
           </div>
         </div>
       </section>
@@ -437,7 +439,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-white" />
                 </div>
-                <span className="ml-2 text-xl font-bold">ExpenseTracker</span>
+                <span className="ml-2 text-xl font-bold">ExpensiGo</span>
               </div>
               <p className="text-gray-400">
                 The intelligent way to manage your finances and achieve your
@@ -451,21 +453,6 @@ export default function LandingPage() {
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
                     Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Security
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    API
                   </a>
                 </li>
                 <li>
@@ -533,7 +520,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 ExpenseTracker. All rights reserved.</p>
+            <p>&copy; 2024 ExpensiGo. All rights reserved.</p>
             <div className="mt-4 flex justify-center space-x-6">
               <a href="#" className="hover:text-white transition-colors">
                 Privacy Policy
