@@ -128,7 +128,7 @@ export default function LandingPage() {
               </Link>
               <div>
                 <a
-                  href="https://youtu.be/VacPr60Z0ss"
+                  href="https://youtu.be/BFivZDpH8mI"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
