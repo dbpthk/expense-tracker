@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+💰 ExpensiGo – Expense & Budget Management App
 
-## Getting Started
+ExpensiGo is a modern full-stack expense tracking and budget management application built with Next.js App Router. It enables users to manage budgets, track categorized expenses, and visualize financial data through an intuitive, responsive interface.
 
-First, run the development server:
+🚀 Live Demo
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+🔗 Live App: (https://expensigo.vercel.app/)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+📌 Features
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+🔐 Secure authentication with Clerk
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+👤 Multi-user support with protected routes
 
-## Learn More
+📊 Interactive budget tracking dashboard
 
-To learn more about Next.js, take a look at the following resources:
+➕ Create, edit, and delete budgets
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🧾 Add, update, and remove categorized expenses
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+📈 Real-time total calculations
 
-## Deploy on Vercel
+💾 Persistent PostgreSQL database storage
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+📱 Fully responsive (mobile-first design)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+🛠️ Tech Stack
+Frontend
+
+Next.js (App Router)
+
+React.js
+
+JavaScript (ES6+)
+
+Tailwind CSS
+
+State & Logic
+
+React Hooks (useState, useEffect, useMemo)
+
+Server Actions
+
+Route Handlers (API endpoints)
+
+CRUD Operations
+
+Backend
+
+Drizzle ORM
+
+PostgreSQL
+
+Authentication
+
+Clerk (Auth & RBAC)
+
+Deployment
+
+Vercel
+
+🧠 Architecture Overview
+
+ExpensiGo uses a modern full-stack architecture powered by the Next.js App Router:
+
+Server Actions for handling mutations
+
+Route Handlers for API logic
+
+Drizzle ORM for type-safe database queries
+
+Authentication middleware for protected routes
+
+Combination of Server and Client Components for optimized performance
+
+📊 Core Functionalities
+Budget Management
+
+Create multiple budgets
+
+Define spending limits
+
+Automatically calculate total expenses
+
+View remaining balance and usage percentage
+
+Expense Tracking
+
+Add expenses under specific budgets
+
+Categorize spending
+
+Edit and delete entries
+
+Automatic total recalculations
+
+📊 Advanced analytics dashboard
+
+📅 Monthly & yearly financial reports
+
+📤 CSV export functionality
+
+🔒 Authentication & Security
+
+Secure login and registration with Clerk
+
+User-specific data isolation
+
+Middleware-based route protection
+
+Protected dashboard access
+
+🎯 Learning Highlights
+
+This project demonstrates:
+
+Full-stack development with Next.js App Router
+
+Authentication & secure user data handling
+
+Database schema design with Drizzle ORM
+
+Efficient CRUD operations
+
+Clean component architecture
+
+Production-ready deployment workflow
