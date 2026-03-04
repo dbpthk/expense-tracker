@@ -1,8 +1,6 @@
 💰 ExpensiGo – Expense & Budget Management App
 
-ExpensiGo is a modern full-stack expense tracking and budget management application built with Next.js App Router. It enables users to manage budgets, track categorized expenses, and visualize financial data through an intuitive, responsive interface.
-
-🚀 Live Demo
+ExpensiGo is a modern full-stack expense tracking and budget management application built with Next.js App Router. It enables users to manage budgets, track categorised expenses, and visualise financial data through an intuitive, responsive interface.
 
 🔗 Live App: (https://expensigo.vercel.app/)
 
@@ -16,7 +14,7 @@ ExpensiGo is a modern full-stack expense tracking and budget management applicat
 
 ➕ Create, edit, and delete budgets
 
-🧾 Add, update, and remove categorized expenses
+🧾 Add, update, and remove categorised expenses
 
 📈 Real-time total calculations
 
@@ -25,6 +23,7 @@ ExpensiGo is a modern full-stack expense tracking and budget management applicat
 📱 Fully responsive (mobile-first design)
 
 🛠️ Tech Stack
+
 Frontend
 
 Next.js (App Router)
@@ -71,9 +70,10 @@ Drizzle ORM for type-safe database queries
 
 Authentication middleware for protected routes
 
-Combination of Server and Client Components for optimized performance
+A combination of Server and Client Components for optimised performance
 
 📊 Core Functionalities
+
 Budget Management
 
 Create multiple budgets
@@ -123,5 +123,4 @@ Database schema design with Drizzle ORM
 Efficient CRUD operations
 
 Clean component architecture
-
 Production-ready deployment workflow
