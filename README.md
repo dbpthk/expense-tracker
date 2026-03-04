@@ -123,4 +123,6 @@ Database schema design with Drizzle ORM
 Efficient CRUD operations
 
 Clean component architecture
+
 Production-ready deployment workflow
+
