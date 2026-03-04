@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
 
     const userEmail = user.primaryEmailAddress.emailAddress;
 
-    const { id } = params;
+    const { id } = await params;
 
     // SECURITY FIX: Only allow access to budgets owned by the authenticated user
     const result = await db
@@ -62,7 +62,7 @@ export async function PUT(request, { params }) {
 
     const userEmail = user.primaryEmailAddress.emailAddress;
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { name, amount, icon, color, createdAt } = body;
 
@@ -121,7 +121,7 @@ export async function DELETE(request, { params }) {
 
     const userEmail = user.primaryEmailAddress.emailAddress;
 
-    const { id } = params;
+    const { id } = await params;
 
     // SECURITY FIX: Only allow deletion of budgets owned by the authenticated user
     // First delete all expenses associated with this budget (only user's own expenses)

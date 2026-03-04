@@ -33,7 +33,7 @@ const updateUserSubscription = async (userId, stripeSubscription) => {
 export async function POST(request) {
   try {
     const body = await request.text();
-    const signature = headers().get("stripe-signature");
+    const signature = (await headers()).get("stripe-signature");
 
     let event;
 

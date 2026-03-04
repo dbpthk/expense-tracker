@@ -18,12 +18,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import EditBudget from "../../budgets/_components/EditBudget";
 
-const ExpenseItem = ({ params }) => {
+const ExpenseItem = () => {
   const route = useRouter();
-  const { id } = params;
+  const { id } = useParams();
   const { user, isLoaded } = useUser();
   const [budgetInfo, setBudgetInfo] = useState(null);
   const [expensesList, setExpensesList] = useState([]);
