@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { useBudget } from "@/context/BugetContext";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +15,21 @@ import AddExpense from "../expenses/_components/AddExpense";
 import CreateBudget from "../budgets/_components/CreateBudget";
 import AIInput from "@/components/ui/ai-input";
 import CardInfo from "./CardInfo";
-import BarChartDashboard from "./BarChartDashboard";
-import PieChartDashboard from "./PieChartDashboard";
 import { DashboardSkeleton } from "@/components/ui/loading-skeleton";
+
+const BarChartDashboard = dynamic(() => import("./BarChartDashboard"), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 h-[400px] animate-pulse" />
+  ),
+});
+
+const PieChartDashboard = dynamic(() => import("./PieChartDashboard"), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6 h-[400px] animate-pulse" />
+  ),
+});
 
 const DashboardClient = () => {
   const {

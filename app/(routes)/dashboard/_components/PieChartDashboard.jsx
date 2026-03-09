@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { memo, useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -8,9 +8,21 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import { PieChart as PieChartIcon, TrendingUp } from "lucide-react";
+import { PieChart as PieChartIcon } from "lucide-react";
 
-const PieChartDashboard = ({ budgetList, expensesList }) => {
+const PieChartDashboard = memo(({ budgetList, expensesList }) => {
+  const data = useMemo(() => {
+    if (!budgetList || budgetList.length === 0) return [];
+    return budgetList.map((budget) => ({
+      name: budget.name,
+      value: Number(budget.amount),
+      color: budget.color,
+      icon: budget.icon,
+      spent: Number(budget.totalSpend || 0),
+      remaining: Number(budget.amount) - Number(budget.totalSpend || 0),
+    }));
+  }, [budgetList]);
+
   if (!budgetList || budgetList.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
@@ -27,15 +39,6 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
       </div>
     );
   }
-
-  const data = budgetList.map((budget) => ({
-    name: budget.name,
-    value: Number(budget.amount),
-    color: budget.color,
-    icon: budget.icon,
-    spent: Number(budget.totalSpend || 0),
-    remaining: Number(budget.amount) - Number(budget.totalSpend || 0),
-  }));
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -179,6 +182,8 @@ const PieChartDashboard = ({ budgetList, expensesList }) => {
       </div>
     </div>
   );
-};
+});
+
+PieChartDashboard.displayName = "PieChartDashboard";
 
 export default PieChartDashboard;

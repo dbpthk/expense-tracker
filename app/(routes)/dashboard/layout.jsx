@@ -1,7 +1,6 @@
 import React from "react";
 import NavBar from "./_components/NavBar.jsx";
 import DashboardClientWrapper from "./DashboardClientWrapper.jsx";
-import Footer from "./_components/Footer.jsx";
 
 const DashboardLayout = ({ children }) => {
   return (

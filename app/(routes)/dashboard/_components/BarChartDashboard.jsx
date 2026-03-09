@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { memo, useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -12,7 +12,18 @@ import {
 } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
-const BarChartDashboard = ({ budgetList }) => {
+const BarChartDashboard = memo(({ budgetList }) => {
+  const data = useMemo(() => {
+    if (!budgetList || budgetList.length === 0) return [];
+    return budgetList.map((budget) => ({
+      name: budget.name,
+      budget: Number(budget.amount),
+      spent: Number(budget.totalSpend || 0),
+      remaining: Number(budget.amount) - Number(budget.totalSpend || 0),
+      color: budget.color,
+    }));
+  }, [budgetList]);
+
   if (!budgetList || budgetList.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 sm:p-6">
@@ -29,14 +40,6 @@ const BarChartDashboard = ({ budgetList }) => {
       </div>
     );
   }
-
-  const data = budgetList.map((budget) => ({
-    name: budget.name,
-    budget: Number(budget.amount),
-    spent: Number(budget.totalSpend || 0),
-    remaining: Number(budget.amount) - Number(budget.totalSpend || 0),
-    color: budget.color,
-  }));
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -158,6 +161,8 @@ const BarChartDashboard = ({ budgetList }) => {
       </div>
     </div>
   );
-};
+});
+
+BarChartDashboard.displayName = "BarChartDashboard";
 
 export default BarChartDashboard;

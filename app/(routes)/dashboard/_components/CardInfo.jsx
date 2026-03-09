@@ -1,8 +1,8 @@
 import { useBudget } from "@/context/BugetContext";
 import { PiggyBank, ReceiptText, Wallet } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { memo } from "react";
 
-const CardInfo = ({ budgetList }) => {
+const CardInfo = memo(({ budgetList }) => {
   const { totalBudget, totalSpend } = useBudget();
 
   return (
@@ -73,6 +73,8 @@ const CardInfo = ({ budgetList }) => {
       )}
     </>
   );
-};
+});
+
+CardInfo.displayName = "CardInfo";
 
 export default CardInfo;

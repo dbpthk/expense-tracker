@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import dynamic from "next/dynamic";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,11 @@ import {
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
-import EmojiPicker from "emoji-picker-react";
+
+const EmojiPicker = dynamic(
+  () => import("emoji-picker-react").then((mod) => mod.default),
+  { ssr: false, loading: () => <div className="h-[400px] w-[300px] animate-pulse bg-gray-100 rounded" /> }
+);
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useUser } from "@clerk/nextjs";

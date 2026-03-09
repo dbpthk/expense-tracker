@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { useSubscription } from "@/context/SubscriptionContext";
 import { useUser } from "@clerk/nextjs";
 import moment from "moment";
@@ -53,7 +53,7 @@ const Expense = () => {
     },
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [lastFetch, setLastFetch] = useState(0);
+  const lastFetchRef = useRef(0);
 
   // Feature access check - allow exports for all users during beta
   const featureAccess = {
@@ -66,11 +66,11 @@ const Expense = () => {
     .format("YYYY-MM");
 
   // Fetch data from database
-  const fetchExpenseData = async (forceRefresh = false) => {
+  const fetchExpenseData = useCallback(async (forceRefresh = false) => {
     if (!user?.primaryEmailAddress?.emailAddress) return;
 
     const now = Date.now();
-    if (!forceRefresh && now - lastFetch < 5000) return; // 5 second cache
+    if (!forceRefresh && now - lastFetchRef.current < 5000) return; // 5 second cache
 
     try {
       setIsLoading(true);
@@ -81,7 +81,7 @@ const Expense = () => {
       if (response.ok) {
         const data = await response.json();
         setExpenseData(data);
-        setLastFetch(now);
+        lastFetchRef.current = now;
       } else {
         toast.error("Failed to fetch expense data");
       }
@@ -91,21 +91,21 @@ const Expense = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.primaryEmailAddress?.emailAddress]);
 
   // Fetch data on mount and when user changes
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
       fetchExpenseData(true);
     }
-  }, [user?.primaryEmailAddress?.emailAddress]);
+  }, [user?.primaryEmailAddress?.emailAddress, fetchExpenseData]);
 
   // Refresh data when month changes
   useEffect(() => {
     if (user && expenseData.expenses.length > 0) {
       fetchExpenseData(true);
     }
-  }, [monthOffset]);
+  }, [monthOffset, user, expenseData.expenses.length, fetchExpenseData]);
 
   const filteredExpenses = useMemo(() => {
     return expenseData.expenses.filter((expense) => {

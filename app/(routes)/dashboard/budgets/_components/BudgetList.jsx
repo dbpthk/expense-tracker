@@ -1,21 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import CreateBudget from "./CreateBudget";
 import { useUser } from "@clerk/nextjs";
 import BudgetItem from "./BudgetItem";
-import { Wallet, TrendingUp, Plus } from "lucide-react";
+import { Wallet } from "lucide-react";
 
 const BudgetList = () => {
   const [budgetList, setBudgetList] = useState(null); // null = loading, [] = no data
   const { user, isLoaded } = useUser();
 
-  useEffect(() => {
-    if (user && isLoaded) {
-      getBudgetList();
-    }
-  }, [user, isLoaded]);
-
-  const getBudgetList = async () => {
+  const getBudgetList = useCallback(async () => {
     try {
       const response = await fetch(`/api/budgets`);
       if (response.ok) {
@@ -28,7 +22,13 @@ const BudgetList = () => {
       console.error("Error fetching budgets:", error);
       setBudgetList([]); // treat as no data on error
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user && isLoaded) {
+      getBudgetList();
+    }
+  }, [user, isLoaded, getBudgetList]);
 
   if (!isLoaded || budgetList === null) {
     // Loading state: show skeleton cards

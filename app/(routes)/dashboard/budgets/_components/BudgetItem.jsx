@@ -1,11 +1,16 @@
 "use client";
 import React, { useState, memo } from "react";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { toTitleCase } from "@/lib/utils";
 import moment from "moment";
-import EmojiPicker from "emoji-picker-react";
+
+const EmojiPicker = dynamic(
+  () => import("emoji-picker-react").then((mod) => mod.default),
+  { ssr: false, loading: () => <div className="h-[400px] w-[300px] animate-pulse bg-gray-100 rounded" /> }
+);
 import {
   Loader,
   Calendar,

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useUser } from "@clerk/nextjs";
 import AddExpense from "../expenses/_components/AddExpense";
 import { Button } from "@/components/ui/button";
@@ -46,13 +46,7 @@ const ManageExpenses = () => {
     }
   }, [user, isLoaded]);
 
-  useEffect(() => {
-    if (selectedBudget) {
-      getExpensesList();
-    }
-  }, [selectedBudget]);
-
-  const getExpensesList = async () => {
+  const getExpensesList = useCallback(async () => {
     if (!selectedBudget) return;
 
     try {
@@ -71,7 +65,13 @@ const ManageExpenses = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedBudget]);
+
+  useEffect(() => {
+    if (selectedBudget) {
+      getExpensesList();
+    }
+  }, [selectedBudget, getExpensesList]);
 
   const editExpense = (expense) => {
     setEditingExpense(expense);
