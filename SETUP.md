@@ -36,6 +36,10 @@ OPENAI_API_KEY=your_openai_api_key_here
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key_here
 CLERK_SECRET_KEY=your_clerk_secret_key_here
+
+# Demo User (optional - for /sign-in?demo=user recruiter/portfolio link)
+DEMO_USER_EMAIL=demo@expensigo.com
+DEMO_USER_PASSWORD=Demo@expensigo
 ```
 
 **Important:** Remove the `NEXT_PUBLIC_` prefix from `DATABASE_URL` for security!
