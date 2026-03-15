@@ -59,11 +59,11 @@ const BudgetList = () => {
 
   const totalBudget = budgetList.reduce(
     (sum, budget) => sum + parseFloat(budget.amount || 0),
-    0
+    0,
   );
   const totalSpent = budgetList.reduce(
     (sum, budget) => sum + parseFloat(budget.totalSpend || 0),
-    0
+    0,
   );
   const remaining = totalBudget - totalSpent;
 
@@ -93,7 +93,7 @@ const BudgetList = () => {
       </div>
 
       {/* Budget Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <CreateBudget refreshData={getBudgetList} />
 
         {budgetList.length === 0 ? (
