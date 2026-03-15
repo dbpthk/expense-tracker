@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
+import { resetDemoData } from "@/lib/resetDemoData";
 
 export async function GET(request) {
   try {
@@ -7,9 +8,11 @@ export async function GET(request) {
     const demoPassword = process.env.DEMO_USER_PASSWORD;
 
     if (!demoEmail || !demoPassword) {
-      console.error("Demo login: DEMO_USER_EMAIL or DEMO_USER_PASSWORD not set");
+      console.error(
+        "Demo login: DEMO_USER_EMAIL or DEMO_USER_PASSWORD not set",
+      );
       return NextResponse.redirect(
-        new URL("/sign-in?error=demo_unavailable", request.url)
+        new URL("/sign-in?error=demo_unavailable", request.url),
       );
     }
 
@@ -21,7 +24,7 @@ export async function GET(request) {
 
     if (!users || users.length === 0) {
       return NextResponse.redirect(
-        new URL("/sign-in?error=demo_unavailable", request.url)
+        new URL("/sign-in?error=demo_unavailable", request.url),
       );
     }
 
@@ -34,14 +37,17 @@ export async function GET(request) {
 
     if (!verified) {
       return NextResponse.redirect(
-        new URL("/sign-in?error=demo_unavailable", request.url)
+        new URL("/sign-in?error=demo_unavailable", request.url),
       );
     }
 
     const { token } = await client.signInTokens.createSignInToken({
       userId: demoUser.id,
-      expiresInSeconds: 60,
+      expiresInSeconds: 300,
     });
+
+    // Reset demo data so recruiters always see fresh seed state
+    await resetDemoData();
 
     const url = new URL("/sign-in", request.url);
     url.searchParams.set("__clerk_ticket", token);
@@ -50,7 +56,7 @@ export async function GET(request) {
   } catch (error) {
     console.error("Demo login error:", error);
     return NextResponse.redirect(
-      new URL("/sign-in?error=demo_unavailable", request.url)
+      new URL("/sign-in?error=demo_unavailable", request.url),
     );
   }
 }

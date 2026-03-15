@@ -65,6 +65,13 @@ ExpensiGo uses a modern full-stack architecture powered by the Next.js App Route
 - Monthly & yearly financial reports
 - CSV export functionality
 
+### Demo Mode (Recruiters)
+
+- Demo user identified by `publicMetadata.demo === true`
+- Demo data resets every 30 minutes (Vercel cron) or on manual trigger
+- Fresh seed data on each demo login
+- Set `CRON_SECRET` in Vercel env for cron authentication
+
 ### Authentication & Security
 
 - Secure login and registration with Clerk
