@@ -31,7 +31,7 @@ export const BudgetProvider = ({ children }) => {
   // Memoized user email to prevent unnecessary re-renders
   const userEmail = useMemo(
     () => user?.primaryEmailAddress?.emailAddress,
-    [user?.primaryEmailAddress?.emailAddress]
+    [user?.primaryEmailAddress?.emailAddress],
   );
 
   // Debounced refresh function to prevent rapid API calls
@@ -46,8 +46,8 @@ export const BudgetProvider = ({ children }) => {
 
       // Check if we should fetch (avoid unnecessary calls)
       const now = Date.now();
-      if (!forceRefresh && now - lastFetch < 10000) {
-        // Increased cache time to 10 seconds for better performance
+      if (!forceRefresh && now - lastFetch < 15000) {
+        // Decrease cache time to 10 seconds if later see any issues
         return;
       }
 
@@ -73,7 +73,7 @@ export const BudgetProvider = ({ children }) => {
         setIsLoading(false);
       }
     },
-    [userEmail, lastFetch, budgetList.length]
+    [userEmail, lastFetch, budgetList.length],
   );
 
   const getAllExpenses = useCallback(
@@ -99,7 +99,7 @@ export const BudgetProvider = ({ children }) => {
         console.error("Error fetching expenses:", error);
       }
     },
-    [userEmail, budgetList, triggerNotificationCheck]
+    [userEmail, budgetList, triggerNotificationCheck],
   );
 
   const calculateCardInfo = useCallback((budgets) => {
@@ -153,7 +153,7 @@ export const BudgetProvider = ({ children }) => {
       totalSpend,
       refreshData,
       isLoading,
-    ]
+    ],
   );
 
   return (
