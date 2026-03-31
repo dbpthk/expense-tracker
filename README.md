@@ -1,45 +1,50 @@
 # 💰 ExpensiGo – Expense & Budget Management App
 
-ExpensiGo is a modern full-stack expense tracking and budget management application built with Next.js App Router. It enables users to manage budgets, track categorised expenses, and visualise financial data through an intuitive, responsive interface.
+ExpensiGo is a full-stack expense tracking and budget management app built with the Next.js App Router. Users manage budgets, categorise expenses, and view analytics through a responsive dashboard.
 
 🔗 **[Live App](https://expensigo.vercel.app/)**
+
+For local setup and environment variables, see **[SETUP.md](./SETUP.md)**.
 
 ---
 
 ## 📌 Features
 
-- 🔐 **Secure authentication** with Clerk
-- 👤 **Multi-user support** with protected routes
-- 📊 **Interactive budget tracking** dashboard
-- ➕ Create, edit, and delete budgets
-- 🧾 Add, update, and remove categorised expenses
-- 📈 Real-time total calculations
-- 💾 Persistent PostgreSQL database storage
-- 📱 Fully responsive (mobile-first design)
+- 🔐 **Authentication** with Clerk (sign-in, sign-up, protected routes)
+- 👤 **Multi-user** data isolation via server-side API routes
+- 📊 **Dashboard** with budgets, expenses, charts (Recharts), and AI-assisted quick inputs
+- ➕ **CRUD** for budgets and expenses
+- 📈 **Totals** and category breakdowns per budget
+- 💾 **PostgreSQL** persistence (Neon) via Drizzle ORM
+- 💳 **Stripe** integration for subscriptions and billing portal
+- 🤖 **OpenAI** for natural-language parsing of expenses and budgets (AI quick actions)
+- 📱 **Responsive** layout (mobile-first)
+- 🎯 **Demo mode** for recruiters (seeded data, optional scheduled reset)
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Category       | Technologies                                                    |
-| -------------- | --------------------------------------------------------------- |
-| **Frontend**   | Next.js (App Router), React.js, JavaScript (ES6+), Tailwind CSS |
-| **State**      | React Hooks, Server Actions, Route Handlers                     |
-| **Backend**    | Drizzle ORM, PostgreSQL                                         |
-| **Auth**       | Clerk (Auth & RBAC)                                             |
-| **Deployment** | Vercel                                                          |
+| Category        | Technologies                                                                 |
+| --------------- | ------------------------------------------------------------------------------ |
+| **Frontend**    | Next.js 15 (App Router), React 18, JavaScript, Tailwind CSS, Radix UI, Framer Motion |
+| **State**       | React Context (budget, subscription, notifications), client `fetch` to APIs |
+| **Backend**     | Next.js Route Handlers (`app/api/*`), Drizzle ORM, PostgreSQL (Neon serverless) |
+| **Auth**        | Clerk                                                                          |
+| **Payments**    | Stripe (checkout, webhooks, customer portal)                                   |
+| **AI**          | OpenAI API (ai-parse route)                                                    |
+| **Charts**      | Recharts                                                                       |
+| **Deployment**  | Vercel (optional cron for demo data reset)                                   |
 
 ---
 
 ## 🧠 Architecture Overview
 
-ExpensiGo uses a modern full-stack architecture powered by the Next.js App Router:
-
-- Server Actions for handling mutations
-- Route Handlers for API logic
-- Drizzle ORM for type-safe database queries
-- Authentication middleware for protected routes
-- A combination of Server and Client Components for optimised performance
+- **Routing:** `app/` uses the App Router with route groups `(auth)` for sign-in/sign-up and `(routes)/dashboard` for the main app shell (layout, nav, pages).
+- **Client vs server:** Dashboard pages are mostly client components; mutations use `fetch` to `/api/*` routes. No direct database access from the browser.
+- **Data:** `lib/db.js` wires Drizzle to Neon; `utils/schema.js` defines tables (`budgets`, `expenses`, `categories`).
+- **Auth:** `middleware.ts` uses `clerkMiddleware` for public routes and `auth.protect()` elsewhere. APIs resolve the current user via Clerk (`auth`, `currentUser`) and scope data by user email.
+- **Cross-cutting:** `app/Provider.jsx` wraps the app with `ClerkProvider` and React contexts (`BudgetProvider`, `SubscriptionProvider`, `NotificationProvider`).
 
 ---
 
@@ -47,37 +52,32 @@ ExpensiGo uses a modern full-stack architecture powered by the Next.js App Route
 
 ### Budget Management
 
-- Create multiple budgets
-- Define spending limits
-- Automatically calculate total expenses
-- View remaining balance and usage percentage
+- Create multiple budgets with limits, icons, and colours
+- Track spend per budget and remaining balance
 
 ### Expense Tracking
 
-- Add expenses under specific budgets
-- Categorise spending
-- Edit and delete entries
-- Automatic total recalculations
+- Add expenses under budgets; categories align with budget names
+- Edit and delete expenses; totals update from API data
 
 ### Analytics & Export
 
-- Advanced analytics dashboard
-- Monthly & yearly financial reports
-- CSV export functionality
+- Dashboard charts and summaries
+- Export routes for budgets/expenses where implemented
 
 ### Demo Mode (Recruiters)
 
-- Demo user identified by `publicMetadata.demo === true`
-- Demo data resets every 30 minutes (Vercel cron) or on manual trigger
-- Fresh seed data on each demo login
-- Set `CRON_SECRET` in Vercel env for cron authentication
+- Demo user is configured in Clerk (`publicMetadata.demo === true` recommended) and matches `DEMO_USER_EMAIL` in env.
+- **Try demo:** `/sign-in?demo=user` redirects to `/api/demo-login`, which seeds demo data and issues a Clerk sign-in ticket.
+- **Scheduled reset:** Vercel cron can call `GET /api/reset-demo` every 30 minutes (see `vercel.json`); set `CRON_SECRET` in Vercel and send `Authorization: Bearer <CRON_SECRET>`.
+- **Manual reset:** Demo users can call `POST /api/reset-demo` when authenticated.
+- Seed definitions live in `lib/demoSeed.js`; reset logic in `lib/resetDemoData.js`.
 
 ### Authentication & Security
 
-- Secure login and registration with Clerk
-- User-specific data isolation
-- Middleware-based route protection
-- Protected dashboard access
+- Clerk handles sessions; APIs enforce ownership using the authenticated user’s email
+- Middleware protects non-public routes
+- Stripe webhooks and optional Clerk webhooks are separate from demo data; demo password reset via webhooks is not required for the demo flow
 
 ---
 
@@ -85,9 +85,8 @@ ExpensiGo uses a modern full-stack architecture powered by the Next.js App Route
 
 This project demonstrates:
 
-- Full-stack development with Next.js App Router
-- Authentication & secure user data handling
-- Database schema design with Drizzle ORM
-- Efficient CRUD operations
-- Clean component architecture
-- Production-ready deployment workflow
+- Full-stack patterns with Next.js App Router and route handlers
+- Clerk-integrated auth and secure, user-scoped API design
+- Drizzle ORM with PostgreSQL
+- CRUD and reporting flows for a finance-style dashboard
+- Production-oriented deployment (e.g. Vercel + Neon)
